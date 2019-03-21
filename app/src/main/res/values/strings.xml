@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ThousandSchnapsen</string>
+    <string name="title_activity_play_bluetooth">PlayBluetoothActivity</string>
 </resources>
