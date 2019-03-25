@@ -12,8 +12,18 @@ import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RadioGroup;
+import android.widget.Toast;
+
 import com.example.thousandschnapsen.bluetooth.DeviceListAdapter;
+
+
 import java.util.ArrayList;
 
 public class PlayBluetoothActivity extends Activity {
@@ -24,7 +34,14 @@ public class PlayBluetoothActivity extends Activity {
 
     BluetoothAdapter mBluetoothAdapter;
     public ArrayList<BluetoothDevice> mBTDevices = new ArrayList<>();
+    BluetoothDevice mBTDevice;
+    Button createServer;
+    String playerNickName;
+
     ListView lvNewDevices;
+
+    int numberOfPlayers = 0;
+
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -36,95 +53,127 @@ public class PlayBluetoothActivity extends Activity {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 mBTDevices.add(device);
                 Log.d(TAG, "onReceive: " + device.getName() + ": " + device.getAddress());
-                DeviceListAdapter mDeviceListAdapter = new DeviceListAdapter(context, R.layout.row_list_view_bluetooth_servers_list, mBTDevices);
+                DeviceListAdapter mDeviceListAdapter = new DeviceListAdapter(context, R.layout.row_list_view_bluetooth_servers_list, mBTDevices, mBluetoothAdapter, playerNickName);
                lvNewDevices.setAdapter(mDeviceListAdapter);
             }
 
-            if (action.equals(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED)) {
-
-                int mode = intent.getIntExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.ERROR);
-
-                switch (mode) {
-                    //Device is in Discoverable Mode
-                    case BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE:
-                        Log.d(TAG, "mBroadcastReceiver2: Discoverability Enabled.");
-                        break;
-                    //Device not in discoverable mode
-                    case BluetoothAdapter.SCAN_MODE_CONNECTABLE:
-                        Log.d(TAG, "mBroadcastReceiver2: Discoverability Disabled. Able to receive connections.");
-                        break;
-                    case BluetoothAdapter.SCAN_MODE_NONE:
-                        Log.d(TAG, "mBroadcastReceiver2: Discoverability Disabled. Not able to receive connections.");
-                        break;
-                    case BluetoothAdapter.STATE_CONNECTING:
-                        Log.d(TAG, "mBroadcastReceiver2: Connecting....");
-                        break;
-                    case BluetoothAdapter.STATE_CONNECTED:
-                        Log.d(TAG, "mBroadcastReceiver2: Connected.");
-                        break;
-                }
-
-            }
-
-            if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
-                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
-
-                switch (state) {
-                    case BluetoothAdapter.STATE_OFF:
-                        Log.d(TAG, "onReceive: STATE OFF");
-                        break;
-                    case BluetoothAdapter.STATE_TURNING_OFF:
-                        Log.d(TAG, "mBroadcastReceiver1: STATE TURNING OFF");
-                        break;
-                    case BluetoothAdapter.STATE_ON:
-                        Log.d(TAG, "mBroadcastReceiver1: STATE ON");
-                        break;
-                    case BluetoothAdapter.STATE_TURNING_ON:
-                        Log.d(TAG, "mBroadcastReceiver1: STATE TURNING ON");
-                        break;
-                }
-            }
-
-            if (action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
-                BluetoothDevice mDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                final int bond = mDevice.getBondState();
-                //3 cases:
-                //case1: bonded already
-                switch (bond) {
-                    case BluetoothDevice.BOND_BONDED:
-                        Log.d(TAG, "BroadcastReceiver: BOND_BONDED.");
-                        //inside BroadcastReceiver4
-//                    mBTDevice = mDevice;
-                        break;
-                    case BluetoothDevice.BOND_BONDING:
-                        Log.d(TAG, "BroadcastReceiver: BOND_BONDING.");
-                        break;
-                    case BluetoothDevice.BOND_NONE:
-                        Log.d(TAG, "BroadcastReceiver: BOND_NONE.");
-                        break;
-
-                }
-            }
         }
     };
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play_bluetooth);
+        lvNewDevices = findViewById(R.id.servers_list_view);
+        createServer = findViewById(R.id.buttonCreateServer);
+
+        createServer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showCreateServerDialog();
+            }
+        });
+
         if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
             requestLocationCorasePermission();
         }
-        else {
-            //NOTHING
-        }
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         enableBT();
+        showSetNickNameDialog();
         enableDiscoverability();
 
-        enableDiscoverDevice();
 
+
+    }
+
+    private void showSetNickNameDialog() {
+        final EditText et_nickName = new EditText(this);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        et_nickName.setLayoutParams(lp);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Graj przez Internet")
+                .setMessage("Podaj swój Nick")
+                .setView(et_nickName)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        playerNickName = et_nickName.getText().toString();
+                        if(playerNickName.isEmpty()) {
+                            showSetNickNameDialog();
+                        }
+                        else enableDiscoverDevice();
+                    }
+                })
+                .setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        playerNickName = "";
+                        startActivity(new Intent(PlayBluetoothActivity.this, MainActivity.class));
+                    }
+                })
+                .create();
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);
+        dialog.show();
+    }
+
+    private void showCreateServerDialog() {
+//        serverName = "";
+            numberOfPlayers = 0;
+
+            final LayoutInflater inflater = LayoutInflater.from(this);
+            final View view = inflater.inflate(R.layout.create_server_internet_dialog, null, false);
+
+//        final EditText et_server_name = view.findViewById(R.id.et_server_name);
+            final RadioGroup radioGroup = view.findViewById(R.id.radioGroup);
+
+            radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(RadioGroup group, int checkedId) {
+                    if(checkedId == R.id.rb_two_players) {
+                        numberOfPlayers = 2;
+                    } else if(checkedId == R.id.rb_three_players) {
+                        numberOfPlayers = 3;
+                    } else if(checkedId == R.id.rb_four_players) {
+                        numberOfPlayers = 4;
+                    }
+                }
+            });
+
+            AlertDialog dialog = new AlertDialog.Builder(this)
+                    .setTitle("Stwórz serwer")
+                    .setMessage("Wybierz liczbę graczy i podaj nazwę serwera")
+                    .setView(view)
+                    .setPositiveButton("Stwórz", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if(numberOfPlayers == 2 || numberOfPlayers == 3 || numberOfPlayers == 4) {
+                                Intent intent = new Intent(PlayBluetoothActivity.this, GameBluetoothActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                intent.putExtra("DEVICE_NAME", mBluetoothAdapter.getName());
+                                intent.putExtra("DEVICE_ADDRESS", mBluetoothAdapter.getAddress());
+                                intent.putExtra("NUMBER_OF_PLAYERS", numberOfPlayers);
+                                intent.putExtra("PLAYER_NICK_NAME", playerNickName);
+                                PlayBluetoothActivity.this.startActivity(intent);
+                            } else {
+                                showCreateServerDialog();
+                                Toast.makeText(getApplicationContext(),"Wypełnij wszystkie pola!",Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    })
+                    .setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            numberOfPlayers = 0;
+//                            serverName = "";
+                        }
+                    })
+                    .create();
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.show();
     }
 
     @Override
@@ -182,15 +231,15 @@ public class PlayBluetoothActivity extends Activity {
             Intent enableBTIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivity(enableBTIntent);
 
+            IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+            registerReceiver(mBroadcastReceiver, BTIntent);
 
-//            IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-//          registerReceiver(mBroadcastReceiver, BTIntent);
+
         }
     }
 
     public void enableDiscoverability() {
-        Intent discoverableIntent =
-                new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+        Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
         discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, DISCOVERABLE_DURATION);
         startActivity(discoverableIntent);
 
@@ -206,7 +255,11 @@ public class PlayBluetoothActivity extends Activity {
         }
 
     }
-    }
+
+
+
+
+}
 
 
 
