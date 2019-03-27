@@ -11,12 +11,12 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.util.Log;
 
-//import com.ramimartin.multibluetooth.bus.BondedDevice;
-//import com.ramimartin.multibluetooth.bus.NbrMaxConnected;
+import com.example.thousandschnapsen.bluetooth.BluetoothClient;
+import com.example.thousandschnapsen.bluetooth.BluetoothServer;
+import com.example.thousandschnapsen.bluetooth.SerialExecutor;
+import com.example.thousandschnapsen.bluetooth.eventBus.HowManyPlayersEvent;
 
-//import com.example.thousandschnapsen.bluetooth.eventBus.BondedDevice;
-//import com.example.thousandschnapsen.bluetooth.eventBus.NbrMaxConnected;
-
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,39 +82,6 @@ public class BluetoothManager extends BroadcastReceiver {
     private boolean mIsTimerCanceled;
     private Thread mThreadClient;
 
-    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            Log.d("", "onReceive: ACTION FOUND.");
-
-            if (action.equals(BluetoothDevice.ACTION_FOUND)) {
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                if (mType == TypeBluetooth.Server && !mAdressListServerWaitingConnection.contains(device.getAddress())) {
-                    Log.d("", "onReceive: " + device.getName() + ": " + device.getAddress());
-                    Log.e("", "Create server thread for" + device.getName() + " device");
-                    createServer(device.getAddress());
-                }
-            }
-            if (action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
-                //Log.e("", "===> ACTION_BOND_STATE_CHANGED");
-                int prevBondState = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, -1);
-                int bondState = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1);
-                if (prevBondState == BluetoothDevice.BOND_BONDING) {
-                    // check for both BONDED and NONE here because in some error cases the bonding fails and we need to fail gracefully.
-                    if (bondState == BluetoothDevice.BOND_BONDED || bondState == BluetoothDevice.BOND_NONE) {
-                        //Log.e("", "===> BluetoothDevice.BOND_BONDED");
-//                    EventBus.getDefault().post(new BondedDevice()); /TODO
-                    }
-                }
-            }
-            if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(intent.getAction())) {
-
-            }
-
-        }
-    };
-
     public BluetoothManager(Activity activity) {
         mActivity = activity;
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -123,7 +90,7 @@ public class BluetoothManager extends BroadcastReceiver {
         mType = TypeBluetooth.None;
         isConnected = false;
         mNbrClientConnection = 0;
-        mMessageMode = MessageMode.Bytes;
+        mMessageMode = MessageMode.String;
         mAdressListServerWaitingConnection = new ArrayList<>();
         mServeurWaitingConnectionList = new HashMap<>();
         mServeurConnectedList = new ArrayList<>();
@@ -197,7 +164,7 @@ public class BluetoothManager extends BroadcastReceiver {
         setServerBluetoothName();
         if (mNbrClientConnection == getNbrClientMax()) {
             Log.e("", "===> incrementNbrConnection mNbrClientConnection OK");
-//            EventBus.getDefault().post(new NbrMaxConnected()); //TODO
+            EventBus.getDefault().post(new HowManyPlayersEvent(mNbrClientConnection));
             resetAllOtherWaitingThreadServer();
         }
     }
@@ -518,36 +485,43 @@ public class BluetoothManager extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.e("", "===> onReceive for BluetoothDevice ");
-        BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-        if (intent.getAction().equals(BluetoothDevice.ACTION_FOUND)) {
-            if (mType == TypeBluetooth.Server && !mAdressListServerWaitingConnection.contains(device.getAddress())) {
-                createServer(device.getAddress());
-                Log.e("", "Create server thread for" + device.getName() + " device");
-
-//                EventBus.getDefault().post(device); //TODO
+//        Log.e("", "===> onReceive for BluetoothDevice ");
+//        BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+//        if (intent.getAction().equals(BluetoothDevice.ACTION_FOUND)) {
+//            if ((mType == TypeBluetooth.Client && !isConnected)
+//                    || (mType == TypeBluetooth.Server && !mAdressListServerWaitingConnection.contains(device.getAddress()))) {
+//                    Log.d("","Creating server thread for" + device.getName() + "  " + device.getAddress());
+//                    createServer(device.getAddress());
+////                EventBus.getDefault().post(device);
 //            }
-            }
-            if (intent.getAction().equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
-                //Log.e("", "===> ACTION_BOND_STATE_CHANGED");
-                int prevBondState = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, -1);
-                int bondState = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1);
-                if (prevBondState == BluetoothDevice.BOND_BONDING) {
-                    // check for both BONDED and NONE here because in some error cases the bonding fails and we need to fail gracefully.
-                    if (bondState == BluetoothDevice.BOND_BONDED || bondState == BluetoothDevice.BOND_NONE) {
-                        //Log.e("", "===> BluetoothDevice.BOND_BONDED");
-//                    EventBus.getDefault().post(new BondedDevice()); /TODO
-                    }
+//        }
+        if (intent.getAction().equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
+            //Log.e("", "===> ACTION_BOND_STATE_CHANGED");
+            int prevBondState = intent.getIntExtra(BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, -1);
+            int bondState = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1);
+            if (prevBondState == BluetoothDevice.BOND_BONDING) {
+                // check for both BONDED and NONE here because in some error cases the bonding fails and we need to fail gracefully.
+                if (bondState == BluetoothDevice.BOND_BONDED || bondState == BluetoothDevice.BOND_NONE) {
+                    //Log.e("", "===> BluetoothDevice.BOND_BONDED");
+//                    EventBus.getDefault().post(new BondedDevice());
                 }
             }
-            if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(intent.getAction())) {
-
-            }
+        }
+        if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(intent.getAction())) {
 
         }
+
     }
 
+    public void isBluetoothOnListExist(BluetoothDevice device){
+            if (!mAdressListServerWaitingConnection.contains(device.getAddress())) {
+                Log.d("isBluetoothOnListExist","Creating server thread for" + device.getName() + "  " + device.getAddress());
+                createServer(device.getAddress());
+//                EventBus.getDefault().post(device);
+            }
 
+
+    }
 
     public void disconnectClient(boolean cancelDiscovery) {
         mType = TypeBluetooth.None;

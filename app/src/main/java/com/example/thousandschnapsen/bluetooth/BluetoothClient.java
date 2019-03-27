@@ -11,6 +11,11 @@ import android.util.Log;
 
 //import org.greenrobot.eventbus.EventBus;
 
+import com.example.thousandschnapsen.bluetooth.eventBus.ClientConnectionFailEvent;
+import com.example.thousandschnapsen.bluetooth.eventBus.ClientConnectionSuccessEvent;
+
+import org.greenrobot.eventbus.EventBus;
+
 import java.io.IOException;
 import java.util.UUID;
 
@@ -27,6 +32,8 @@ public class BluetoothClient extends BluetoothRunnable {
     private BluetoothConnector mBluetoothConnector;
 
     private boolean KEEP_TRYING_CONNEXION;
+
+
 
     public BluetoothClient(BluetoothAdapter bluetoothAdapter, String uuiDappIdentifier, String adressMacServer, Activity activity, BluetoothManager.MessageMode messageMode) {
         super(bluetoothAdapter, uuiDappIdentifier, activity, messageMode);
@@ -48,7 +55,7 @@ public class BluetoothClient extends BluetoothRunnable {
                 mInputStream = mSocket.getInputStream();
             } catch (IOException e1) {
                 Log.e("", "===> mSocket IOException : "+ e1.getMessage());
-                //EventBus.getDefault().post(new ClientConnectionFail(mServerAddress));
+                EventBus.getDefault().post(new ClientConnectionFailEvent(mServerAddress));
                 e1.printStackTrace();
             }
         }
@@ -64,14 +71,14 @@ public class BluetoothClient extends BluetoothRunnable {
     }
 
     @Override
-    public void onConnectionSucess() {
+    public void onConnectionSuccess() {
 
-//        EventBus.getDefault().post(new ClientConnectionSuccess());
+        EventBus.getDefault().post(new ClientConnectionSuccessEvent());
     }
 
     @Override
     public void onConnectionFail() {
-//        EventBus.getDefault().post(new ClientConnectionFail(mServerAddress));
+        EventBus.getDefault().post(new ClientConnectionFailEvent(mServerAddress));
     }
 
     @Override

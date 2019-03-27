@@ -43,7 +43,7 @@ public class PlayBluetoothActivity extends Activity {
     int numberOfPlayers = 0;
 
 
-    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mPlayBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
@@ -83,6 +83,7 @@ public class PlayBluetoothActivity extends Activity {
         enableBT();
         showSetNickNameDialog();
         enableDiscoverability();
+        enableDiscoverDevice();
 
 
 
@@ -104,7 +105,7 @@ public class PlayBluetoothActivity extends Activity {
                         if(playerNickName.isEmpty()) {
                             showSetNickNameDialog();
                         }
-                        else enableDiscoverDevice();
+
                     }
                 })
                 .setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
@@ -123,7 +124,7 @@ public class PlayBluetoothActivity extends Activity {
     private void showCreateServerDialog() {
 //        serverName = "";
             numberOfPlayers = 0;
-
+            mBluetoothAdapter.cancelDiscovery();
             final LayoutInflater inflater = LayoutInflater.from(this);
             final View view = inflater.inflate(R.layout.create_server_internet_dialog, null, false);
 
@@ -157,7 +158,10 @@ public class PlayBluetoothActivity extends Activity {
                                 intent.putExtra("DEVICE_ADDRESS", mBluetoothAdapter.getAddress());
                                 intent.putExtra("NUMBER_OF_PLAYERS", numberOfPlayers);
                                 intent.putExtra("PLAYER_NICK_NAME", playerNickName);
-                                PlayBluetoothActivity.this.startActivity(intent);
+//                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                                unregisterReceiver(mPlayBroadcastReceiver);
+                                startActivity(intent);
                             } else {
                                 showCreateServerDialog();
                                 Toast.makeText(getApplicationContext(),"Wypełnij wszystkie pola!",Toast.LENGTH_SHORT).show();
@@ -176,12 +180,19 @@ public class PlayBluetoothActivity extends Activity {
             dialog.show();
     }
 
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mBluetoothAdapter.cancelDiscovery();
+        unregisterReceiver(mPlayBroadcastReceiver);
+    }
 
-        // Don't forget to unregister the ACTION_FOUND receiver.
-        unregisterReceiver(mBroadcastReceiver);
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(PlayBluetoothActivity.this, MainActivity.class);
+        startActivity(intent);
     }
 
 
@@ -232,7 +243,7 @@ public class PlayBluetoothActivity extends Activity {
             startActivity(enableBTIntent);
 
             IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-            registerReceiver(mBroadcastReceiver, BTIntent);
+            registerReceiver(mPlayBroadcastReceiver, BTIntent);
 
 
         }
@@ -250,7 +261,7 @@ public class PlayBluetoothActivity extends Activity {
             mBluetoothAdapter.startDiscovery();
             IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
             Log.i(TAG, "Disccovering devices");
-            registerReceiver(mBroadcastReceiver, filter);
+            registerReceiver(mPlayBroadcastReceiver, filter);
 
         }
 

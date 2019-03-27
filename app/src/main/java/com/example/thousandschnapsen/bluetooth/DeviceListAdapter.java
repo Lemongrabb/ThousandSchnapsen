@@ -66,14 +66,14 @@ public class DeviceListAdapter extends ArrayAdapter<BluetoothDevice> {
                         Log.d(TAG, "onItemClick: deviceAddress = " + deviceAddress);
 
                         mBluetoothAdapter.cancelDiscovery();
-                        mBluetoothAdapter.getBondedDevices();
 
                         Intent intent = new Intent(mContext, GameBluetoothActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         intent.putExtra("DEVICE_NAME", device.getName());
                         intent.putExtra("DEVICE_ADDRESS", device.getAddress());
                         intent.putExtra("BT_DEVICE", device);
                         intent.putExtra("PLAYER_NICK_NAME", playerNickName);
+//                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         mContext.startActivity(intent);
 
 

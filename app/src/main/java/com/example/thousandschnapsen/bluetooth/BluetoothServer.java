@@ -13,6 +13,11 @@ import android.util.Log;
 //
 //import org.greenrobot.eventbus.EventBus;
 
+import com.example.thousandschnapsen.bluetooth.eventBus.ServerConnectionFailEvent;
+import com.example.thousandschnapsen.bluetooth.eventBus.ServerConnectionSuccessEvent;
+
+import org.greenrobot.eventbus.EventBus;
+
 import java.io.IOException;
 import java.util.UUID;
 
@@ -46,13 +51,13 @@ public class BluetoothServer extends BluetoothRunnable {
     }
 
     @Override
-    public void onConnectionSucess() {
-//        EventBus.getDefault().post(new ServeurConnectionSuccess(mClientAddress)); //TODO
+    public void onConnectionSuccess() {
+        EventBus.getDefault().post(new ServerConnectionSuccessEvent(mClientAddress));
     }
 
     @Override
     public void onConnectionFail() {
-//        EventBus.getDefault().post(new ServeurConnectionFail(mClientAddress));  //TODO
+        EventBus.getDefault().post(new ServerConnectionFailEvent(mClientAddress));
     }
 
     @Override

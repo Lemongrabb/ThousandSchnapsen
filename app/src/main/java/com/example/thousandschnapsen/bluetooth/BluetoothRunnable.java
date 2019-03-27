@@ -11,6 +11,10 @@ import android.util.Log;
 //
 //import org.greenrobot.eventbus.EventBus;
 
+import com.example.thousandschnapsen.bluetooth.eventBus.MessageSyncEvent;
+
+import org.greenrobot.eventbus.EventBus;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -41,6 +45,7 @@ public abstract class BluetoothRunnable implements Runnable {
     private BluetoothManager.MessageMode mMessageMode;
     private int mCountObjectInputStreamExection;
     private boolean mIsConnected;
+    EventBus mEventBus = EventBus.getDefault();
 
     public BluetoothRunnable(BluetoothAdapter bluetoothAdapter, String uuiDappIdentifier, Activity activity, BluetoothManager.MessageMode messageMode) {
         mBluetoothAdapter = bluetoothAdapter;
@@ -76,11 +81,11 @@ public abstract class BluetoothRunnable implements Runnable {
             mOutputStreamWriter.flush();
             mObjectOutputStream.reset();
 
-            onConnectionSucess();
+            onConnectionSuccess();
 
             // I DONT KNOW WHY BUT ALWAYS THE FIRST MESSAGE SENT HAS UNWANTED CHARACTERS OR CHARACTERS MISSING
             // SO FOR CLEANING IT I SEND MESSAGE ON THE CONNECTION
-            writeString("Connected");
+//            writeString("Connected");
 
             while (CONTINUE_READ_WRITE) {
 
@@ -131,9 +136,10 @@ public abstract class BluetoothRunnable implements Runnable {
                                     result = result + new String(buffer, 0, bytesRead);
                                     sb.append(result);
                                 }
-//                                EventBus.getDefault().post(new BluetoothCommunicatorString(sb.toString()));  //TODO
+                                EventBus.getDefault().post(new MessageSyncEvent(sb.toString()));
                             } catch (IOException e) {
                                 Log.e(TAG, "===> Error Received String IOException : " + e.getMessage());
+                                onConnectionFail();
                             }
 
                             break;
@@ -184,7 +190,7 @@ public abstract class BluetoothRunnable implements Runnable {
 
     public abstract void intiObjReader() throws IOException;
 
-    public abstract void onConnectionSucess();
+    public abstract void onConnectionSuccess();
 
     public abstract void onConnectionFail();
 
