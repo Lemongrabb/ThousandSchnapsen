@@ -13,10 +13,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.thousandschnapsen.GameBluetoothActivity;
-import com.example.thousandschnapsen.GameInternetActivity;
-import com.example.thousandschnapsen.MainActivity;
-import com.example.thousandschnapsen.PlayBluetoothActivity;
-import com.example.thousandschnapsen.PlayInternetActivity;
 import com.example.thousandschnapsen.R;
 
 import java.util.ArrayList;
@@ -32,7 +28,8 @@ public class DeviceListAdapter extends ArrayAdapter<BluetoothDevice> {
     private static final String TAG = "DeviceListAdapter";
 
 
-    public DeviceListAdapter(Context context, int tvResourceId, ArrayList<BluetoothDevice> devices, BluetoothAdapter BluetoothAdapter, String playerNickName){
+    public DeviceListAdapter(Context context, int tvResourceId, ArrayList<BluetoothDevice> devices,
+                             BluetoothAdapter BluetoothAdapter, String playerNickName){
         super(context, tvResourceId,devices);
         this.mDevices = devices;
         this.mContext = context;
@@ -49,12 +46,15 @@ public class DeviceListAdapter extends ArrayAdapter<BluetoothDevice> {
         final BluetoothDevice device = mDevices.get(position);
 
         if (device != null) {
-            TextView deviceName = (TextView) convertView.findViewById(R.id.tv_server_name);
-            TextView deviceAdress = (TextView) convertView.findViewById(R.id.tv_server_mac);
-            if (deviceName != null & deviceAdress != null) {
-                deviceName.setText(device.getName());
-                deviceAdress.setText(device.getAddress());
-                Button joinServerButton = (Button) convertView.findViewById(R.id.button_join_server);
+            TextView deviceName =  convertView.findViewById(R.id.tv_server_name);
+            TextView tVNumberOfPlayers = convertView.findViewById(R.id.tv_number_of_players);
+            if (deviceName != null) {
+
+                Button joinServerButton =  convertView.findViewById(R.id.button_join_server);
+
+                String[] dividedDeviceName = device.getName().split(" ");
+                tVNumberOfPlayers.setText(Integer.parseInt(dividedDeviceName[3])+1 + "/3");
+                deviceName.setText(dividedDeviceName[1]);
 
                 joinServerButton.setOnClickListener(new View.OnClickListener(){
                     @Override
@@ -62,6 +62,7 @@ public class DeviceListAdapter extends ArrayAdapter<BluetoothDevice> {
                         Log.d(TAG, "onItemClick: You Clicked on a device.");
                         String deviceName = device.getName();
                         String deviceAddress = device.getAddress();
+
                         Log.d(TAG, "onItemClick: deviceName = " + deviceName);
                         Log.d(TAG, "onItemClick: deviceAddress = " + deviceAddress);
 
@@ -72,11 +73,8 @@ public class DeviceListAdapter extends ArrayAdapter<BluetoothDevice> {
                         intent.putExtra("DEVICE_ADDRESS", device.getAddress());
                         intent.putExtra("BT_DEVICE", device);
                         intent.putExtra("PLAYER_NICK_NAME", playerNickName);
-//                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         mContext.startActivity(intent);
-
-
                     }
                 });
             }

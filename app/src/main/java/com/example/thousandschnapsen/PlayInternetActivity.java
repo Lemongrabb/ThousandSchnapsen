@@ -32,7 +32,7 @@ public class PlayInternetActivity extends AppCompatActivity {
     private Socket mSocket;
     public static String playerId = "";
     public static String playerNickName = "";
-    int numberOfPlayers = 0;
+    int numberOfPlayers = 3;
     String serverName = "";
 
     @Override
@@ -136,37 +136,37 @@ public class PlayInternetActivity extends AppCompatActivity {
     }
 
     private void showCreateServerDialog(Context c) {
-        numberOfPlayers = 0;
+        numberOfPlayers = 3;
         serverName = "";
 
         final LayoutInflater inflater = LayoutInflater.from(c);
         final View view = inflater.inflate(R.layout.create_server_internet_dialog, null, false);
 
         final EditText et_server_name = view.findViewById(R.id.et_server_name);
-        final RadioGroup radioGroup = view.findViewById(R.id.radioGroup);
-
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if(checkedId == R.id.rb_two_players) {
-                    numberOfPlayers = 2;
-                } else if(checkedId == R.id.rb_three_players) {
-                    numberOfPlayers = 3;
-                } else if(checkedId == R.id.rb_four_players) {
-                    numberOfPlayers = 4;
-                }
-            }
-        });
+//        final RadioGroup radioGroup = view.findViewById(R.id.radioGroup);
+//
+//        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(RadioGroup group, int checkedId) {
+//                if(checkedId == R.id.rb_two_players) {
+//                    numberOfPlayers = 2;
+//                } else if(checkedId == R.id.rb_three_players) {
+//                    numberOfPlayers = 3;
+//                } else if(checkedId == R.id.rb_four_players) {
+//                    numberOfPlayers = 4;
+//                }
+//            }
+//        });
 
         AlertDialog dialog = new AlertDialog.Builder(c)
-            .setTitle("Stwórz serwer")
-            .setMessage("Wybierz liczbę graczy i podaj nazwę serwera")
+            .setTitle("Stwórz serwer w sieci Internet dla 3 graczy")
+            .setMessage("Podaj nazwę serwera")
             .setView(view)
             .setPositiveButton("Stwórz", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     serverName = et_server_name.getText().toString();
-                    if((numberOfPlayers == 2 || numberOfPlayers == 3 || numberOfPlayers == 4) && !serverName.isEmpty()) {
+                    if(/*(numberOfPlayers == 2 || numberOfPlayers == 3 || numberOfPlayers == 4) &&*/ !serverName.isEmpty()) {
                         JSONObject serverData = new JSONObject();
                         try {
                             serverData.put("server_owner_id", playerId);
@@ -180,14 +180,14 @@ public class PlayInternetActivity extends AppCompatActivity {
                         joinServer(serverName, playerId, playerNickName);
                     } else {
                         showCreateServerDialog(PlayInternetActivity.this);
-                        Toast.makeText(getApplicationContext(),"Wypełnij wszystkie pola!",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(),"Podaj nazwę serwera!",Toast.LENGTH_SHORT).show();
                     }
                 }
             })
             .setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    numberOfPlayers = 0;
+                    numberOfPlayers = 3;
                     serverName = "";
                 }
             })

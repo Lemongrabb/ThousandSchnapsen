@@ -6,13 +6,12 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.Executor;
 
-/**
- * Created by Rami on 16/06/2017.
- */
+
 public class SerialExecutor implements Executor {
     private final Queue<Runnable> mTasks;
     private final Executor mExecutor;
     private Runnable mRunnableActive;
+
 
     public SerialExecutor(Executor executor) {
         mTasks = new ArrayDeque();

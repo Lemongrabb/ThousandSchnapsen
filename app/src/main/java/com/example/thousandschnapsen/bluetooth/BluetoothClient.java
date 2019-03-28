@@ -5,12 +5,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
-
-//import com.example.thousandschnapsen.bluetooth.eventBus.ClientConnectionFail;
-//import com.example.thousandschnapsen.bluetooth.eventBus.ClientConnectionSuccess;
-
-//import org.greenrobot.eventbus.EventBus;
-
 import com.example.thousandschnapsen.bluetooth.eventBus.ClientConnectionFailEvent;
 import com.example.thousandschnapsen.bluetooth.eventBus.ClientConnectionSuccessEvent;
 
@@ -18,6 +12,10 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.util.UUID;
+
+//import com.example.thousandschnapsen.bluetooth.eventBus.ClientConnectionFail;
+//import com.example.thousandschnapsen.bluetooth.eventBus.ClientConnectionSuccess;
+//import org.greenrobot.eventbus.EventBus;
 
 
 /**

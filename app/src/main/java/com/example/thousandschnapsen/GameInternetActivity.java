@@ -48,6 +48,7 @@ public class GameInternetActivity extends AppCompatActivity {
             public void onClick(View v) {
                 mSocket.disconnect();
                 startActivity(new Intent(GameInternetActivity.this, MainActivity.class));
+                finish();
             }
         });
 
@@ -110,7 +111,8 @@ public class GameInternetActivity extends AppCompatActivity {
             }
         });
 
-        final EditText editText = findViewById(R.id.messageText);
+        final EditText editText = findViewById(R.id.editText);
+        editText.setText(playerNickName);
         final Button button = findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -138,6 +140,7 @@ public class GameInternetActivity extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
         mSocket.disconnect();
+        finish();
     }
 
 }

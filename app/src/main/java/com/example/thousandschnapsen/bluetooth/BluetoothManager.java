@@ -11,9 +11,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.util.Log;
 
-import com.example.thousandschnapsen.bluetooth.BluetoothClient;
-import com.example.thousandschnapsen.bluetooth.BluetoothServer;
-import com.example.thousandschnapsen.bluetooth.SerialExecutor;
 import com.example.thousandschnapsen.bluetooth.eventBus.HowManyPlayersEvent;
 
 import org.greenrobot.eventbus.EventBus;
@@ -47,7 +44,7 @@ public class BluetoothManager extends BroadcastReceiver {
     public static final int REQUEST_DISCOVERABLE_CODE = 114;
 
     public static int BLUETOOTH_REQUEST_ACCEPTED;
-    public static final int BLUETOOTH_REQUEST_REFUSED = 0; // NE PAS MODIFIER LA VALEUR
+    public static final int BLUETOOTH_REQUEST_REFUSED = 0;
 
     public static final int BLUETOOTH_TIME_DICOVERY_60_SEC = 60;
     public static final int BLUETOOTH_TIME_DICOVERY_120_SEC = 120;
@@ -81,6 +78,8 @@ public class BluetoothManager extends BroadcastReceiver {
     private BluetoothManager.MessageMode mMessageMode;
     private boolean mIsTimerCanceled;
     private Thread mThreadClient;
+    private String serverName;
+    private String playerAdminName;
 
     public BluetoothManager(Activity activity) {
         mActivity = activity;
@@ -102,6 +101,14 @@ public class BluetoothManager extends BroadcastReceiver {
         mUuiDappIdentifier = uuiDappIdentifier;
     }
 
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public void setPlayerAdminName(String playerAdminName) {
+        this.playerAdminName = playerAdminName;
+    }
+
     public void setMessageMode(MessageMode messageMode) {
         this.mMessageMode = messageMode;
     }
@@ -112,12 +119,28 @@ public class BluetoothManager extends BroadcastReceiver {
     }
 
     private void setServerBluetoothName() {
-        Resources res = mActivity.getResources();
-        int placeLeft = (getNbrClientMax() - mNbrClientConnection);
-        String appName = getApplicationName();
-        //String blthName = res.getQuantityString(R.plurals.blth_name, placeLeft, placeLeft, android.os.Build.MODEL, appName);
-        //mBluetoothAdapter.setName(blthName);
-//        mBluetoothAdapter.setName("Server " + (getNbrClientMax() - mNbrClientConnection) + " places available " + android.os.Build.MODEL);
+        setOldBTDeviceName();
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        mBluetoothAdapter.setName("T$SS " + serverName + " " + playerAdminName + " " +
+                mNbrClientConnection + " " + getNbrClientMax() + " $" + mBluetoothAdapter.getName());
+    }
+
+    public void setNewBTDeviceName(String playerNickName) {
+        setOldBTDeviceName();
+        mBluetoothAdapter.setName("T$S " + playerNickName + " $" + mBluetoothAdapter.getName());
+        Log.d("Server name: ", mBluetoothAdapter.getName());
+    }
+
+    public void setOldBTDeviceName(){
+        if (mBluetoothAdapter.getName().startsWith("T$S") || mBluetoothAdapter.getName().startsWith("T$SS")) {
+            String deviceName = mBluetoothAdapter.getName();
+            String[] oldDeviceName = deviceName.split("\\$");
+            mBluetoothAdapter.setName(oldDeviceName[2]);
+        }
     }
 
     public String getApplicationName() {
@@ -158,13 +181,17 @@ public class BluetoothManager extends BroadcastReceiver {
         return mNbrClientConnection == getNbrClientMax();
     }
 
+    public int getmNbrClientConnection() {
+        return mNbrClientConnection;
+    }
+
     public void incrementNbrConnection() {
-        mNbrClientConnection = mNbrClientConnection + 1;
+        mNbrClientConnection++;
         Log.e("", "===> incrementNbrConnection mNbrClientConnection : " + mNbrClientConnection);
+        EventBus.getDefault().post(new HowManyPlayersEvent(mNbrClientConnection));
         setServerBluetoothName();
         if (mNbrClientConnection == getNbrClientMax()) {
             Log.e("", "===> incrementNbrConnection mNbrClientConnection OK");
-            EventBus.getDefault().post(new HowManyPlayersEvent(mNbrClientConnection));
             resetAllOtherWaitingThreadServer();
         }
     }
@@ -375,48 +402,6 @@ public class BluetoothManager extends BroadcastReceiver {
         mSerialExecutor.execute(runnable);
     }
 
-    public void sendObjectForAll(final Object obj) {
-        Log.e("", "===> sendObjectForAll ");
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-
-                if (mType != null && isConnected) {
-                    if (mServeurConnectedList != null) {
-                        for (int i = 0; i < mServeurConnectedList.size(); i++) {
-                            mServeurConnectedList.get(i).writeSerialized(obj);
-                        }
-                    }
-                    if (mBluetoothClient != null) {
-                        mBluetoothClient.writeSerialized(obj);
-                    }
-                }
-            }
-        };
-        mSerialExecutor.execute(runnable);
-    }
-
-    public void sendBytesForAll(final byte[] message) {
-        Log.e("", "===> sendBytesForAll ");
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-
-                if (mType != null && isConnected) {
-                    if (mServeurConnectedList != null) {
-                        for (int i = 0; i < mServeurConnectedList.size(); i++) {
-                            mServeurConnectedList.get(i).writeBytes(message);
-                        }
-                    }
-                    if (mBluetoothClient != null) {
-                        mBluetoothClient.writeBytes(message);
-                    }
-                }
-            }
-        };
-        mSerialExecutor.execute(runnable);
-    }
-
     public void sendStringMessage(final String adressMacTarget, final String message) {
         Log.e("", "===> sendMessage ");
         Runnable runnable = new Runnable() {
@@ -437,6 +422,31 @@ public class BluetoothManager extends BroadcastReceiver {
             }
         };
         mSerialExecutor.execute(runnable);
+    }
+
+    public void sendStringMessageExeptSpecifiedAddress(final String adressMacTarget, final String message) {
+        if(mType  == TypeBluetooth.Server) {
+            Log.e("", "===> sendMessage ");
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (mType != null && isConnected) {
+                        if (mServeurConnectedList != null) {
+                            for (BluetoothServer bluetoothServer : mServeurConnectedList) {
+                                if (!bluetoothServer.getClientAddress().equals(adressMacTarget)) {
+                                    bluetoothServer.writeString(message);
+                                }
+                            }
+                        }
+                        if (mBluetoothClient != null) {
+                            mBluetoothClient.writeString(message);
+                        }
+                    }
+                }
+            };
+            mSerialExecutor.execute(runnable);
+        }
+
     }
 
     public void sendObject(final String adressMacTarget, final Object obj) {
@@ -513,25 +523,26 @@ public class BluetoothManager extends BroadcastReceiver {
 
     }
 
+    public void ifTheDeviceIsForthisGame(BluetoothDevice device){
+        if (device.getName().startsWith("T$S")) isBluetoothOnListExist(device);
+    }
+
     public void isBluetoothOnListExist(BluetoothDevice device){
             if (!mAdressListServerWaitingConnection.contains(device.getAddress())) {
                 Log.d("isBluetoothOnListExist","Creating server thread for" + device.getName() + "  " + device.getAddress());
                 createServer(device.getAddress());
-//                EventBus.getDefault().post(device);
             }
 
 
     }
 
-    public void disconnectClient(boolean cancelDiscovery) {
+    public void disconnectClient() {
         mType = TypeBluetooth.None;
-        if(cancelDiscovery) cancelDiscovery();
         resetClient();
     }
 
-    public void disconnectServer(boolean cancelDiscovery) {
+    public void disconnectServer() {
         resetMode();
-        if(cancelDiscovery) cancelDiscovery();
         resetAllThreadServer();
         isConnected = false;
     }

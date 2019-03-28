@@ -5,12 +5,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
-//import com.example.thousandschnapsen.bluetooth.eventBus.BluetoothCommunicatorBytes;
-//import com.example.thousandschnapsen.bluetooth.eventBus.BluetoothCommunicatorObject;
-//import com.example.thousandschnapsen.bluetooth.eventBus.BluetoothCommunicatorString;
-//
-//import org.greenrobot.eventbus.EventBus;
-
 import com.example.thousandschnapsen.bluetooth.eventBus.MessageSyncEvent;
 
 import org.greenrobot.eventbus.EventBus;
@@ -21,6 +15,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
+
+//import com.example.thousandschnapsen.bluetooth.eventBus.BluetoothCommunicatorBytes;
+//import com.example.thousandschnapsen.bluetooth.eventBus.BluetoothCommunicatorObject;
+//import com.example.thousandschnapsen.bluetooth.eventBus.BluetoothCommunicatorString;
+//
+//import org.greenrobot.eventbus.EventBus;
 
 
 /**
@@ -136,7 +136,7 @@ public abstract class BluetoothRunnable implements Runnable {
                                     result = result + new String(buffer, 0, bytesRead);
                                     sb.append(result);
                                 }
-                                EventBus.getDefault().post(new MessageSyncEvent(sb.toString()));
+                                EventBus.getDefault().post(new MessageSyncEvent(sb.toString(),mClientAddress));
                             } catch (IOException e) {
                                 Log.e(TAG, "===> Error Received String IOException : " + e.getMessage());
                                 onConnectionFail();

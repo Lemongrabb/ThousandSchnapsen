@@ -1,6 +1,6 @@
 package com.example.thousandschnapsen;
 
 public class Constants {
-    public static final String SERVER_URL = "http://145.239.81.56";
-    public static final String SERVER_SOCKET_IO_PATH = "/thousand-schnapsen/socket.io";
+    public static final String SERVER_URL = "http://51.77.158.206";
+    public static final String SERVER_SOCKET_IO_PATH = "/ts/socket.io";
 }
