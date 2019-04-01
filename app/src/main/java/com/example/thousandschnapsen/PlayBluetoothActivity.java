@@ -36,7 +36,7 @@ public class PlayBluetoothActivity extends AppCompatActivity {
 
     private static final String TAG = "PlayBluetoothActivity";
     private static final int COARSE_LOCATION_CODE = 1;
-    private static final int DISCOVERABLE_DURATION = 600; //10 min
+    private static final int DISCOVERABLE_DURATION = 600; // widoczność urządzenia 10min
 
     BluetoothAdapter mBluetoothAdapter;
     public ArrayList<BluetoothDevice> mBTDevices = new ArrayList<>();
@@ -51,7 +51,7 @@ public class PlayBluetoothActivity extends AppCompatActivity {
 
 
     ListView lvNewDevices;
-
+//wyszukuje urządzenia bt-bluetooth i wyświetla na liście
     private BroadcastReceiver mPlayBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -71,7 +71,6 @@ public class PlayBluetoothActivity extends AppCompatActivity {
                     DeviceListAdapter mDeviceListAdapter = new DeviceListAdapter(context,  R.layout.row_list_view_bluetooth_servers_list, mBTDevices, mBluetoothAdapter, playerNickName);
                     lvNewDevices.setAdapter(mDeviceListAdapter);
                 }
-
             }
         }
     };
@@ -94,16 +93,17 @@ public class PlayBluetoothActivity extends AppCompatActivity {
             }
         });
 
-        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) { //Sprawdzenie czy gra musi mieć uprawnienia
             requestLocationCorasePermission();
         }
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        if(!mBluetoothAdapter.isEnabled()){
+        if(!mBluetoothAdapter.isEnabled()){  //Czy bluetooth jest uruchominy, jeśli nie to pokaż informacje o uruchumieniu bt
             showEnableBTDialog();
         }
-        else showSetNickNameDialog();
+        else showSetNickNameDialog(); //Jeśli bt jest uruchominy to wpisz nazwę użytkownika
 
+        //skanowanie urządzeń
         enableDiscoverability();
         discoverDevice = true;
         scanAllBluetoothDevice();
@@ -142,7 +142,7 @@ public class PlayBluetoothActivity extends AppCompatActivity {
         }
     }
 
-
+//jeśli naciśniesz wstecz to zamkij okno
     @Override
     public void onBackPressed() {
         Intent intent = new Intent(PlayBluetoothActivity.this, MainActivity.class);
@@ -152,7 +152,7 @@ public class PlayBluetoothActivity extends AppCompatActivity {
         finish();
     }
 
-
+//wyświtlenie okna do ustawienia nazwy gracza
     private void showSetNickNameDialog() {
         final EditText et_nickName = new EditText(this);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
@@ -188,6 +188,7 @@ public class PlayBluetoothActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    //utwórz taką nazwę urządzenia by była widoczna przez serwer
     private void setNewBTDeviceName(String playerNickName) {
         if (mBluetoothAdapter.getName().startsWith("TS") || mBluetoothAdapter.getName().startsWith("TSS")) {
             String deviceName = mBluetoothAdapter.getName();
@@ -199,7 +200,7 @@ public class PlayBluetoothActivity extends AppCompatActivity {
             Log.d("Device Name: ", mBluetoothAdapter.getName());
         }
     }
-
+    //ustaw starą nawę urządzenia jaka była wcześniej
     private void setOldBTDeviceName(){
         if (mBluetoothAdapter.getName().startsWith("TS") || mBluetoothAdapter.getName().startsWith("TSS")) {
             String deviceName = mBluetoothAdapter.getName();
@@ -208,6 +209,7 @@ public class PlayBluetoothActivity extends AppCompatActivity {
         }
     }
 
+    //okno do tworzenia serwera
     private void showCreateServerDialog() {
         if(!mBluetoothAdapter.isEnabled()){
             showEnableBTDialog();
@@ -261,6 +263,7 @@ public class PlayBluetoothActivity extends AppCompatActivity {
         }
     }
 
+    //okno z informacją o uruchomieniu bt
     private void showEnableBTDialog() {
         AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(this)
                 .setMessage("Do prawidłowego działania gra wymaga włączenia Bluetooth")
@@ -288,7 +291,7 @@ public class PlayBluetoothActivity extends AppCompatActivity {
 
 
 
-
+    //uprawnienia
     private void requestLocationCorasePermission() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                 Manifest.permission.ACCESS_COARSE_LOCATION)) {
@@ -311,6 +314,7 @@ public class PlayBluetoothActivity extends AppCompatActivity {
         }
     }
 
+    //uprawnienia
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == COARSE_LOCATION_CODE)  {
@@ -324,6 +328,7 @@ public class PlayBluetoothActivity extends AppCompatActivity {
         }
     }
 
+    //uruchom bt
     public void enableBT(){
         if(mBluetoothAdapter == null){
             Log.d(TAG, "enableDisableBT: Does not have BT capabilities.");
@@ -338,6 +343,7 @@ public class PlayBluetoothActivity extends AppCompatActivity {
         }
     }
 
+    //uruchom broadcast reciever
     public void enableDiscoverability() {
         Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
         discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, DISCOVERABLE_DURATION);
