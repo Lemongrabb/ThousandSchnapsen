@@ -8,7 +8,7 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.text.format.Formatter;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,18 +21,25 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class PlayWifiActivity extends AppCompatActivity {
 
+    //zmienne gui
+    Button buttonCreateServer;
+    ListView servers_list_view;
+
+
     String serverIp;
-    String playerNickName;
-    String playerId;
+    static String playerNickname;
+    static String playerId;
     private String serverName;
     private int max_player = 3;
     private int portUDP = 10000;
@@ -40,30 +47,38 @@ public class PlayWifiActivity extends AppCompatActivity {
     ScheduledExecutorService scheduleTaskExecutor;//planowanie wykonania zadania
     DatagramSocket socketUDP; // socket dla komunikacji UDP
     DatagramPacket packetUDP; //pakiet presylany przez socket
-    ListView servers_list_view;
-    ArrayList<ServerWifi> serversData = new ArrayList<>();
+    List<ServerWifi> serversData = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play_wifi);
-
         init();
-
-        showSetNickNameDialog(PlayWifiActivity.this);
-
         scheduleTaskExecutor = Executors.newScheduledThreadPool(1);
-        scheduleTaskExecutor.scheduleAtFixedRate(new Runnable() {
-            public void run() {
-                ServerWifiActivity.this.runOnUiThread(new Runnable() {
-                    nasluch();
-                }
+        if (getIP().equals("")||getIP().equals("0.0.0.0")) {
+            showNoIpAddres( PlayWifiActivity.this);
+        } else {
+            showSetNickNameDialog(PlayWifiActivity.this);
+            try {
+                socketUDP = new DatagramSocket(portUDP);
+                scheduleTaskExecutor.scheduleAtFixedRate(new Runnable() {
+                    public void run() {
+                        PlayWifiActivity.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                nasluch();
+                            }
+                        });
+                    }
+                }, 0, 1, TimeUnit.SECONDS);
+            } catch (SocketException e) {
+                e.printStackTrace();
             }
         }
     }
 
     private void init() {
-        final Button buttonCreateServer = findViewById(R.id.buttonCreateServer);
+        buttonCreateServer = findViewById(R.id.buttonCreateServer);
         buttonCreateServer.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 showCreateServerDialog(PlayWifiActivity.this);
@@ -84,8 +99,8 @@ public class PlayWifiActivity extends AppCompatActivity {
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        playerNickName = et_nickName.getText().toString();
-                        if (playerNickName.isEmpty()) {
+                        playerNickname = et_nickName.getText().toString();
+                        if (playerNickname.isEmpty()) {
                             showSetNickNameDialog(PlayWifiActivity.this);
                         }
                     }
@@ -94,7 +109,7 @@ public class PlayWifiActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         playerId = "";
-                        playerNickName = "";
+                        playerNickname = "";
                         startActivity(new Intent(PlayWifiActivity.this, MainActivity.class));
                     }
                 })
@@ -105,46 +120,48 @@ public class PlayWifiActivity extends AppCompatActivity {
     }
 
     private void showCreateServerDialog(Context c) {
-        max_player = 3;
-        serverName = "";
-        serverIp = getIP();
-        final LayoutInflater inflater = LayoutInflater.from(c);
-        final View view = inflater.inflate(R.layout.create_server_internet_dialog, null, false);
-        final EditText et_server_name = view.findViewById(R.id.et_server_name);
-        AlertDialog dialog = new AlertDialog.Builder(c)
-                .setTitle("Stwórz serwer w sieci lokalnej dla 3 graczy")
-                .setMessage("Podaj nazwę serwera")
-                .setView(view)
-                .setPositiveButton("Stwórz", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        serverName = et_server_name.getText().toString();
-                        if (!serverName.isEmpty()) {
-                            scheduleTaskExecutor.shutdown();
-                            socketUDP.close();
-                            Intent serverData = new Intent(PlayWifiActivity.this, ServerWifiActivity.class);
-                            serverData.putExtra("server_ip", serverIp);
-                            serverData.putExtra("server_name", serverName);
-                            serverData.putExtra("server_owner_id", playerId);
-                            serverData.putExtra("server_owner_nick_name", playerNickName);
-                            serverData.putExtra("max_player", max_player);
-                            startActivity(serverData);
-                        } else {
-                            showCreateServerDialog(PlayWifiActivity.this);
-                            Toast.makeText(getApplicationContext(), "Podaj nazwę serwera!", Toast.LENGTH_SHORT).show();
+        if (getIP().equals("")||getIP().equals("0.0.0.0")) {
+            showNoIpAddres( PlayWifiActivity.this);
+        } else {
+            max_player = 3;
+            serverName = "";
+            serverIp = getIP();
+            final LayoutInflater inflater = LayoutInflater.from(c);
+            final View view = inflater.inflate(R.layout.create_server_internet_dialog, null, false);
+            final EditText et_server_name = view.findViewById(R.id.et_server_name);
+            AlertDialog dialog = new AlertDialog.Builder(c)
+                    .setTitle("Stwórz serwer w sieci lokalnej dla 3 graczy")
+                    .setMessage("Podaj nazwę serwera")
+                    .setView(view)
+                    .setPositiveButton("Stwórz", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            serverName = et_server_name.getText().toString();
+                            if (!serverName.isEmpty()) {
+                                Intent serverData = new Intent(PlayWifiActivity.this, ServerWifiActivity.class);
+                                serverData.putExtra("server_ip", serverIp);
+                                serverData.putExtra("server_name", serverName);
+                                serverData.putExtra("server_owner_id", playerId);
+                                serverData.putExtra("server_owner_nick_name", playerNickname);
+                                serverData.putExtra("max_player", max_player);
+                                startActivity(serverData);
+                            } else {
+                                showCreateServerDialog(PlayWifiActivity.this);
+                                Toast.makeText(getApplicationContext(), "Podaj nazwę serwera!", Toast.LENGTH_SHORT).show();
+                            }
                         }
-                    }
-                })
-                .setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        max_player = 3;
-                        serverName = "";
-                    }
-                })
-                .create();
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.show();
+                    })
+                    .setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            max_player = 3;
+                            serverName = "";
+                        }
+                    })
+                    .create();
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.show();
+        }
     }
 
     //---Narzedzia---\\
@@ -191,37 +208,52 @@ public class PlayWifiActivity extends AppCompatActivity {
         String[] tmpServerData = msg.split(",");
         //sprawdzenie bitu zycia
         ServerWifi tmpServer = new ServerWifi(tmpServerData[0], tmpServerData[1], tmpServerData[2], tmpServerData[3]);
-        if (tmpServerData[4].equals("1")) {
-            if (!serversData.contains(tmpServer)) {
-                serversData.add(tmpServer);
-                MyCustomAdapterWifi adapter = new MyCustomAdapterWifi(serversData, getApplicationContext());
-                servers_list_view.setAdapter(adapter);
-            }
+        if (tmpServerData[4].equals("1") && !serversData.contains(tmpServer)) {
+            serversData.add(tmpServer);
+            MyCustomAdapterWifi adapter = new MyCustomAdapterWifi(serversData, getApplicationContext());
+            servers_list_view.setAdapter(adapter);
         }
-        if (tmpServerData[4].equals("0")) {
-            if (serversData.contains(tmpServer)) {
-                serversData.remove(tmpServer);
-                MyCustomAdapterWifi adapter = new MyCustomAdapterWifi(serversData, getApplicationContext());
-                servers_list_view.setAdapter(adapter);
-            }
+        if (tmpServerData[4].equals("0") && serversData.contains(tmpServer)) {
+            serversData.remove(tmpServer);
+            MyCustomAdapterWifi adapter = new MyCustomAdapterWifi(serversData, getApplicationContext());
+            servers_list_view.setAdapter(adapter);
         }
+
+    }
+
+    private void showNoIpAddres(Context c) {
+        AlertDialog dialog = new AlertDialog.Builder(c)
+                .setTitle("Graj przez Wifi")
+                .setMessage("Nie jestes polaczony z siecia wifi lub nie posiadasz prawodlowo nadanego adresu ip.")
+                .setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        startActivity(new Intent(PlayWifiActivity.this, MainActivity.class));
+                    }
+                })
+                .create();
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);
+        dialog.show();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        scheduleTaskExecutor.shutdown();
-        socketUDP.close();
+        if(scheduleTaskExecutor!=null)
+            scheduleTaskExecutor.shutdown();
+        if(socketUDP!=null)
+            socketUDP.close();
         //TODO add more stuf
     }
 }
 
 
 class MyCustomAdapterWifi extends BaseAdapter implements ListAdapter {
-    ArrayList<ServerWifi> arrayList;
+    List<ServerWifi> arrayList;
     private Context context;
 
-    public MyCustomAdapterWifi(ArrayList<ServerWifi> arrayList, Context context) {
+    public MyCustomAdapterWifi(List<ServerWifi> arrayList, Context context) {
         this.arrayList = arrayList;
         this.context = context;
     }
@@ -262,7 +294,6 @@ class MyCustomAdapterWifi extends BaseAdapter implements ListAdapter {
         TextView numberOfPlayersText = view.findViewById(R.id.tv_number_of_players);
         numberOfPlayersText.setText(players_online + " / " + number_of_players);
 
-
         Button joinServerButton = view.findViewById(R.id.button_join_server);
 
         joinServerButton.setOnClickListener(new View.OnClickListener() {
@@ -274,8 +305,8 @@ class MyCustomAdapterWifi extends BaseAdapter implements ListAdapter {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.putExtra("SERVER_IP", server_ip);
                 intent.putExtra("SERVER_NAME", server_name);
-                intent.putExtra("PLAYER_ID", PlayWifiActivity.playerId);
-                intent.putExtra("PLAYER_NICK_NAME", PlayWifiActivity.playerNickName);
+                intent.putExtra("PLAYER_ID",  com.example.thousandschnapsen.PlayWifiActivity.playerId);
+                intent.putExtra("PLAYER_NICK_NAME",  com.example.thousandschnapsen.PlayWifiActivity.playerNickname);
                 context.startActivity(intent);
             }
         });
@@ -283,7 +314,6 @@ class MyCustomAdapterWifi extends BaseAdapter implements ListAdapter {
         if (Integer.parseInt(number_of_players) == Integer.parseInt(players_online)) {
             joinServerButton.setEnabled(false);
         }
-
         return view;
     }
 }
@@ -301,25 +331,33 @@ class ServerWifi {
         this.players_online = players_online;
         this.number_of_players = number_of_players;
     }
-
     public String getServerIP() {
         return server_ip;
     }
-
+    public void setServerIP(String newServerIP){
+        server_ip = newServerIP;
+    }
     public String getServerName() {
         return server_name;
     }
-
+    public void setServerName(String newServerName){
+        server_name = newServerName;
+    }
     public String getPlayersOnline() {
         return players_online;
     }
-
-    public String numberOfPlayers() {
+    public void setPlayersOnline(String newPlayersOnline){
+        players_online = newPlayersOnline;
+    }
+    public String getNumberOfPlayers() {
         return number_of_players;
     }
-
+    public void setNumberOfPlayers(String newNumberOfPlayers){
+        number_of_players = newNumberOfPlayers;
+    }
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj)
+    {
         return (this.server_ip.equals(((ServerWifi) obj).server_ip)
                 && this.server_name.equals(((ServerWifi) obj).server_name)
                 && this.players_online.equals(((ServerWifi) obj).players_online)

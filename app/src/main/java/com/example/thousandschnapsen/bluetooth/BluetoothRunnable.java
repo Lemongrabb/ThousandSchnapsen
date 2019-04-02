@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStreamWriter;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -34,7 +33,6 @@ public abstract class BluetoothRunnable implements Runnable {
     private ObjectOutputStream mObjectOutputStream;
     private ObjectInputStream mObjectInputStream;
     private boolean mIsConnected;
-//    private final static byte[]
 
     public BluetoothRunnable(BluetoothAdapter bluetoothAdapter, String uuiDappIdentifier, AppCompatActivity activity) {
         mBluetoothAdapter = bluetoothAdapter;

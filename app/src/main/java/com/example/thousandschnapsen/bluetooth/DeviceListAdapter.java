@@ -12,9 +12,10 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
+
 import com.example.thousandschnapsen.GameBluetoothActivity;
-import com.example.thousandschnapsen.PlayBluetoothActivity;
 import com.example.thousandschnapsen.R;
+
 import java.util.ArrayList;
 
 public class DeviceListAdapter extends ArrayAdapter<BluetoothDevice> {
