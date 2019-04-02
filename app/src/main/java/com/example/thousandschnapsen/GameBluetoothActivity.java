@@ -56,7 +56,7 @@ public class GameBluetoothActivity extends AppCompatActivity {
 
     BluetoothManager bluetoothManager;  //Klasa do tworzenia połączenia bt i kontroli komunikacji
 
-    //BroadcastReciever do wyszukiwania urządzeń bt-bluetooth dla serwera
+    //BroadcastReceiver do wyszukiwania urządzeń bt-bluetooth dla serwera
     private BroadcastReceiver mServerBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
