@@ -376,7 +376,7 @@ public class BluetoothManager {
 
     public void ifTheDeviceIsForThisGame(BluetoothDevice device) {
         if ((device.getName() == null)) {
-            Log.d("Device name", "DUPA");
+            Log.d("Gamebluetoothactivity: ", "Device with null name, ignoring...");
         }
          else  if (device.getName().startsWith("TS")) isBluetoothOnListExist(device);
 

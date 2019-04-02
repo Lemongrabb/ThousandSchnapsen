@@ -61,7 +61,7 @@ public class PlayBluetoothActivity extends AppCompatActivity {
             if (action.equals(BluetoothDevice.ACTION_FOUND) || action.equals(BluetoothDevice.ACTION_NAME_CHANGED)) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 if ((device.getName() == null)){
-                    Log.d("Playbluetooth", "DUPA");
+                    Log.d("PlaybluetoothActivity: ", "Device with null name, ignoring...");
                 }
                 else if (device.getName().startsWith("TSS") && !mBTDevices.contains(device)) {
                     mBTDevices.add(device);
