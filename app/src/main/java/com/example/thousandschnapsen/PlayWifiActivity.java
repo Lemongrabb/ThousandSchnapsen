@@ -36,11 +36,12 @@ public class PlayWifiActivity extends AppCompatActivity {
     Button buttonCreateServer;
     ListView servers_list_view;
 
-
+    //zmienne tekstowe
     String serverIp;
     static String playerNickname;
     static String playerId;
     private String serverName;
+    //zmienne liczbowe
     private int max_player = 3;
     private int portUDP = 10000;
 
