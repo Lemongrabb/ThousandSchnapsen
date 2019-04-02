@@ -47,7 +47,6 @@ public class GameWifiActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_wifi);
 
-        //pobieranie zmiennych z poprzedniej aktywnosci
         Intent intent = getIntent();
         serverIP = intent.getStringExtra("SERVER_IP");
         serverName = intent.getStringExtra("SERVER_NAME");

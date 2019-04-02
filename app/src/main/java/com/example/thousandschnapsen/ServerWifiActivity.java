@@ -64,7 +64,7 @@ public class ServerWifiActivity extends AppCompatActivity {
         setContentView(R.layout.activity_server_wifi);
 
         ServerWifiActivity.context = getApplicationContext();
-        //pobieranie zmiennych z poprzedniej aktywnosci
+
         Intent intent = getIntent();
         serverIp = intent.getStringExtra("server_ip");
         serverName = intent.getStringExtra("server_name");
