@@ -54,13 +54,13 @@ public class PlayWifiActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play_wifi);
         init();
+        scheduleTaskExecutor = Executors.newScheduledThreadPool(1);
         if (getIP().equals("")||getIP().equals("0.0.0.0")) {
-            showNoIpAddres(getApplicationContext());
+            showNoIpAddres( PlayWifiActivity.this);
         } else {
             showSetNickNameDialog(PlayWifiActivity.this);
             try {
                 socketUDP = new DatagramSocket(portUDP);
-                scheduleTaskExecutor = Executors.newScheduledThreadPool(1);
                 scheduleTaskExecutor.scheduleAtFixedRate(new Runnable() {
                     public void run() {
                         PlayWifiActivity.this.runOnUiThread(new Runnable() {
@@ -121,7 +121,7 @@ public class PlayWifiActivity extends AppCompatActivity {
 
     private void showCreateServerDialog(Context c) {
         if (getIP().equals("")||getIP().equals("0.0.0.0")) {
-            showNoIpAddres(getApplicationContext());
+            showNoIpAddres( PlayWifiActivity.this);
         } else {
             max_player = 3;
             serverName = "";
@@ -240,8 +240,10 @@ public class PlayWifiActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        scheduleTaskExecutor.shutdown();
-        socketUDP.close();
+        if(scheduleTaskExecutor!=null)
+            scheduleTaskExecutor.shutdown();
+        if(socketUDP!=null)
+            socketUDP.close();
         //TODO add more stuf
     }
 }

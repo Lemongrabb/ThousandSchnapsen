@@ -73,7 +73,7 @@ public class ServerWifiActivity extends AppCompatActivity {
         maxPlayer = intent.getIntExtra("max_player", 3);
 
         if (getIP().equals("")||getIP().equals("0.0.0.0")) {
-            showNoIpAddres(getApplicationContext());
+            showNoIpAddres(ServerWifiActivity.this);
         } else {
             handler = new Handler();
 
@@ -84,7 +84,7 @@ public class ServerWifiActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     if (getIP().equals("")||getIP().equals("0.0.0.0")) {
-                        showNoIpAddres(getApplicationContext());
+                        showNoIpAddres(ServerWifiActivity.this);
                     } else {
                         String msg = edtText.getText().toString();
                         showMessage(msg);
@@ -291,7 +291,7 @@ public class ServerWifiActivity extends AppCompatActivity {
                 /* Start the conversation. */
                 while (true) {
                     String line = is.readLine();
-                    if (line.startsWith("Disconnect")) {
+                    if (line == null||line.startsWith("Disconnect")) {
                         break;
                     }
 
@@ -346,9 +346,11 @@ public class ServerWifiActivity extends AppCompatActivity {
         sendBroadcast(serverIp + "," + serverName + "," + onlinePlayers + "," + maxPlayer + ",", "0");
         try {
             serverSocket.close();
-            clientSocket.shutdownOutput();
-            clientSocket.shutdownInput();
-            clientSocket.close();
+            if(clientSocket!=null) {
+                clientSocket.shutdownOutput();
+                clientSocket.shutdownInput();
+                clientSocket.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

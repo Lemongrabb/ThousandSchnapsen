@@ -55,7 +55,7 @@ public class GameWifiActivity extends AppCompatActivity {
         maxPlayers = intent.getIntExtra("MAX_PLAYER", 3);
 
         if (getIP().equals("")||getIP().equals("0.0.0.0")) {
-            showNoIpAddres(getApplicationContext());
+            showNoIpAddres(GameWifiActivity.this);
         } else {
             handler = new Handler();
 
@@ -72,7 +72,7 @@ public class GameWifiActivity extends AppCompatActivity {
                     String msg = edtText.getText().toString().trim();
                     if (null != clientThread) {
                         if (getIP().equals("")||getIP().equals("0.0.0.0")) {
-                            showNoIpAddres(getApplicationContext());
+                            showNoIpAddres(GameWifiActivity.this);
                         } else {
                             clientThread.sendMessage(msg);
                         }
@@ -200,9 +200,8 @@ public class GameWifiActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (null != clientThread) {
+        if ( clientThread!= null) {
             clientThread.sendMessage("Disconnect");
-            clientThread = null;
             try {
                 clientThread.socket.shutdownInput();
                 clientThread.socket.shutdownOutput();
