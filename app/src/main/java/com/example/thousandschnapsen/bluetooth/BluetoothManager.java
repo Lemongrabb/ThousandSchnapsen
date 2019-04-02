@@ -374,8 +374,12 @@ public class BluetoothManager {
 
 
 
-    public void ifTheDeviceIsForThisGame(BluetoothDevice device){
-        if (device.getName().startsWith("TS")) isBluetoothOnListExist(device);
+    public void ifTheDeviceIsForThisGame(BluetoothDevice device) {
+        if ((device.getName() == null)) {
+            Log.d("Device name", "DUPA");
+        }
+         else  if (device.getName().startsWith("TS")) isBluetoothOnListExist(device);
+
     }
 
     public void isBluetoothOnListExist(BluetoothDevice device){

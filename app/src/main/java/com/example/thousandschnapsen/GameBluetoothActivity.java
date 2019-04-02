@@ -41,7 +41,7 @@ public class GameBluetoothActivity extends AppCompatActivity {
     String deviceAddress = "";
     String playerNickName = "";
     String serverName = "";
-    public static int MAX_NUMBER_OF_PLAYERS = 3; //Maksymalna liczba graczy
+    public static int MAX_NUMBER_OF_PLAYERS = 2; //Maksymalna liczba graczy
     boolean connected = false;
     String typeBluetooth = "";
     public String message = "";
@@ -122,7 +122,7 @@ public class GameBluetoothActivity extends AppCompatActivity {
         Log.d("ServerConnection", "Success");
 
         //Jeśli ilość urządzeń == wartości maksymlanej podłączonych urządzeń
-        if(bluetoothManager.getmNbrClientConnection()+1 == MAX_NUMBER_OF_PLAYERS){
+        if(bluetoothManager.getmNbrClientConnection() == MAX_NUMBER_OF_PLAYERS){
             gameReady = true;
             scanDevices = false;    //Przerwij skanowanie urządzeń bt dla serwera
             bluetoothManager.cancelDiscoveryTimer();
