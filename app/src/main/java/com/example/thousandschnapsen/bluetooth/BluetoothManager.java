@@ -35,7 +35,6 @@ public class BluetoothManager {
     private AppCompatActivity mActivity;
     public BluetoothAdapter mBluetoothAdapter;
     private BluetoothClient mBluetoothClient;
-    private ExecutorService mMessageSenderQueue;
 
     private ArrayList<String> mAdressListServerWaitingConnection;
     private HashMap<String, BluetoothServer> mServeurWaitingConnectionList;
@@ -45,9 +44,9 @@ public class BluetoothManager {
     public HashMap<String, String> listOfConnectedPlayers;
     private SerialExecutor mSerialExecutor;
     private int mNbrClientConnection;
-    public TypeBluetooth mType;
+    public TypeBluetooth typeBluetooth;
     private int mTimeDiscoverable;
-    public boolean isConnected;
+    private boolean isConnected;
     private boolean mBluetoothIsEnableOnStart;
     private String mBluetoothNameSaved;
     private String mUuiDappIdentifier;
@@ -57,14 +56,13 @@ public class BluetoothManager {
     private Thread mThreadClient;
     private String serverName;
     private String playerAdminName;
-    private String myAddressMac = "";
 
     public BluetoothManager(AppCompatActivity activity) {
-        mActivity = (AppCompatActivity) activity;
+        mActivity = activity;
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         mBluetoothNameSaved = mBluetoothAdapter.getName();
         mBluetoothIsEnableOnStart = mBluetoothAdapter.isEnabled();
-        mType = TypeBluetooth.None;
+        typeBluetooth = TypeBluetooth.None;
         isConnected = false;
         mNbrClientConnection = 0;
         mAdressListServerWaitingConnection = new ArrayList<>();
@@ -90,13 +88,11 @@ public class BluetoothManager {
 
 
     public void selectServerMode() {
-        mType = TypeBluetooth.Server;
+        typeBluetooth = TypeBluetooth.Server;
         setServerBluetoothName();
     }
 
     private void setServerBluetoothName() {
-//        setOldBTDeviceName();
-
         if (mBluetoothAdapter.getName().startsWith("TS") || mBluetoothAdapter.getName().startsWith("TSS")) {
             String deviceName = mBluetoothAdapter.getName();
             String[] oldDeviceName = deviceName.split("\\$");
@@ -120,11 +116,11 @@ public class BluetoothManager {
 
 
     public void selectClientMode() {
-        mType = TypeBluetooth.Client;
+        typeBluetooth = TypeBluetooth.Client;
     }
 
-    public void resetMode() {
-        mType = TypeBluetooth.None;
+    private void resetMode() {
+        typeBluetooth = TypeBluetooth.None;
     }
 
 
@@ -134,7 +130,7 @@ public class BluetoothManager {
         }
     }
 
-    public int getNbrClientMax() {
+    private int getNbrClientMax() {
         return BLUETOOTH_NBR_CLIENT_MAX;
     }
 
@@ -142,7 +138,7 @@ public class BluetoothManager {
         return mNbrClientConnection;
     }
 
-    public void incrementNbrConnection() {
+    private void incrementNbrConnection() {
         mNbrClientConnection++;
         Log.e("", "===> incrementNbrConnection mNbrClientConnection : " + mNbrClientConnection);
         EventBus.getDefault().post(new HowManyPlayersEvent(mNbrClientConnection));
@@ -153,7 +149,7 @@ public class BluetoothManager {
         }
     }
 
-    public void decrementNbrConnection() {
+    private void decrementNbrConnection() {
         if (mNbrClientConnection == 0) {
             return;
         }
@@ -180,7 +176,7 @@ public class BluetoothManager {
     }
 
 
-    public void cancelDiscovery() {
+    private void cancelDiscovery() {
         mIsTimerCanceled = false;
             mBluetoothAdapter.cancelDiscovery();
             cancelDiscoveryTimer();
@@ -190,7 +186,7 @@ public class BluetoothManager {
 
 
 
-    public TimerTask createTimer(){
+    private TimerTask createTimer(){
         return new TimerTask() {
 
             @Override
@@ -220,9 +216,6 @@ public class BluetoothManager {
         mTimer = null;
     }
 
-    public BluetoothManager.TypeBluetooth getTypeBluetooth() {
-        return mType;
-    }
 
     private void resetAllOtherWaitingThreadServer() {
         cancelDiscovery();
@@ -232,7 +225,7 @@ public class BluetoothManager {
                 Log.e("", "===> resetWaitingThreadServer BluetoothServer : " + bluetoothServerMap.getKey());
                 bluetoothServerMap.getValue().closeConnection();
                 Thread serverThread = mServeurThreadList.get(bluetoothServerMap.getKey());
-                serverThread.interrupt();
+                if (serverThread != null) serverThread.interrupt();
                 mServeurThreadList.remove(bluetoothServerMap.getKey());
                 it.remove();
             }
@@ -240,7 +233,7 @@ public class BluetoothManager {
     }
 
     public void createClient(String addressMac) {
-        if (mType == TypeBluetooth.Client) {
+        if (typeBluetooth == TypeBluetooth.Client) {
             mBluetoothClient = new BluetoothClient(mBluetoothAdapter, mUuiDappIdentifier, addressMac, mActivity);
             mThreadClient = new Thread(mBluetoothClient);
             mThreadClient.start();
@@ -248,26 +241,22 @@ public class BluetoothManager {
     }
 
     public void onClientConnectionSuccess(){
-        if (mType == TypeBluetooth.Client) {
+        if (typeBluetooth == TypeBluetooth.Client) {
             isConnected = true;
             cancelDiscovery();
         }
     }
 
-    public boolean createServer(String address) {
-        if (mType == TypeBluetooth.Server && !mAdressListServerWaitingConnection.contains(address)) {
+    private void createServer(String address) {
+        if (typeBluetooth == TypeBluetooth.Server && !mAdressListServerWaitingConnection.contains(address)) {
             BluetoothServer mBluetoothServer = new BluetoothServer(mBluetoothAdapter, mUuiDappIdentifier, address, mActivity);
             Thread threadServer = new Thread(mBluetoothServer);
             threadServer.start();
             setServerWaitingConnection(address, mBluetoothServer, threadServer);
-//            IntentFilter bondStateIntent = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-            return true;
-        } else {
-            return false;
         }
     }
 
-    public void setServerWaitingConnection(String address, BluetoothServer bluetoothServer, Thread threadServer) {
+    private void setServerWaitingConnection(String address, BluetoothServer bluetoothServer, Thread threadServer) {
         mAdressListServerWaitingConnection.add(address);
         mServeurWaitingConnectionList.put(address, bluetoothServer);
         mServeurThreadList.put(address, threadServer);
@@ -311,7 +300,7 @@ public class BluetoothManager {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                if (mType != null && isConnected) {
+                if (typeBluetooth != null && isConnected) {
                     if (mServeurConnectedList != null) {
                         for (BluetoothServer bluetoothServer : mServeurConnectedList) {
                             bluetoothServer.writeString(message);
@@ -331,7 +320,7 @@ public class BluetoothManager {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                if (mType != null && isConnected) {
+                if (typeBluetooth != null && isConnected) {
                     if (mServeurConnectedList != null) {
                         for (BluetoothServer bluetoothServer : mServeurConnectedList) {
                             if (bluetoothServer.getClientAddress().equals(adressMacTarget)) {
@@ -349,12 +338,12 @@ public class BluetoothManager {
     }
 
     public void sendStringMessageExeptSpecifiedAddress(final String adressMacTarget, final String message) {
-        if(mType  == TypeBluetooth.Server) {
+        if(typeBluetooth  == TypeBluetooth.Server) {
             Log.e("", "===> sendMessage ");
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
-                    if (mType != null && isConnected) {
+                    if (typeBluetooth != null && isConnected) {
                         if (mServeurConnectedList != null) {
                             for (BluetoothServer bluetoothServer : mServeurConnectedList) {
                                 if (!bluetoothServer.getClientAddress().equals(adressMacTarget)) {
@@ -374,11 +363,15 @@ public class BluetoothManager {
 
 
 
-    public void ifTheDeviceIsForThisGame(BluetoothDevice device){
-        if (device.getName().startsWith("TS")) isBluetoothOnListExist(device);
+    public void ifTheDeviceIsForThisGame(BluetoothDevice device) {
+        if ((device.getName() == null)) {
+            Log.d("Gamebluetoothactivity: ", "Device with null name, ignoring...");
+        }
+         else  if (device.getName().startsWith("TS")) isBluetoothOnListExist(device);
+
     }
 
-    public void isBluetoothOnListExist(BluetoothDevice device){
+    private void isBluetoothOnListExist(BluetoothDevice device){
             if (!mAdressListServerWaitingConnection.contains(device.getAddress())) {
                 Log.d("isBluetoothOnListExist","Creating server thread for" + device.getName() + "  " + device.getAddress());
                 String nickName = getNickName(device);
@@ -397,7 +390,7 @@ public class BluetoothManager {
     }
 
     public void disconnectClient() {
-        mType = TypeBluetooth.None;
+        typeBluetooth = TypeBluetooth.None;
         resetClient();
     }
 
@@ -407,7 +400,7 @@ public class BluetoothManager {
         isConnected = false;
     }
 
-    public void resetClient() {
+    private void resetClient() {
         if (mBluetoothClient != null) {
             mBluetoothClient.closeConnection();
             if(null != mThreadClient){
@@ -418,7 +411,7 @@ public class BluetoothManager {
         }
     }
 
-    public void resetAllThreadServer(){
+    private void resetAllThreadServer(){
         for (Iterator<Map.Entry<String, BluetoothServer>> it = mServeurWaitingConnectionList.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<String, BluetoothServer> bluetoothServerMap = it.next();
             listOfConnectedPlayers.clear();
@@ -441,13 +434,9 @@ public class BluetoothManager {
 
         cancelDiscovery();
 
-        if (mType != null) {
+        if (typeBluetooth != null) {
             resetAllThreadServer();
             resetClient();
-        }
-
-        try {
-        } catch (Exception e) {
         }
 
         if (!mBluetoothIsEnableOnStart) {
