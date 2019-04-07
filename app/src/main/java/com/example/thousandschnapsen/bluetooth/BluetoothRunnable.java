@@ -71,9 +71,6 @@ public abstract class BluetoothRunnable implements Runnable {
             while (CONTINUE_READ_WRITE) {
 
                 synchronized (this) {
-//                    try {
-
-
                         try {
                             if(mInputStream == null) return;
                             mObjectInputStream = new ObjectInputStream(mInputStream);
@@ -95,7 +92,6 @@ public abstract class BluetoothRunnable implements Runnable {
                                 mIsConnected = false;
                             }
                         }
-
                 }
             }
 

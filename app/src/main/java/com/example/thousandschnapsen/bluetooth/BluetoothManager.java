@@ -45,7 +45,7 @@ public class BluetoothManager {
     public HashMap<String, String> listOfConnectedPlayers;
     private SerialExecutor mSerialExecutor;
     private int mNbrClientConnection;
-    public TypeBluetooth mType;
+    public TypeBluetooth typeBluetooth;
     private int mTimeDiscoverable;
     public boolean isConnected;
     private boolean mBluetoothIsEnableOnStart;
@@ -64,7 +64,7 @@ public class BluetoothManager {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         mBluetoothNameSaved = mBluetoothAdapter.getName();
         mBluetoothIsEnableOnStart = mBluetoothAdapter.isEnabled();
-        mType = TypeBluetooth.None;
+        typeBluetooth = TypeBluetooth.None;
         isConnected = false;
         mNbrClientConnection = 0;
         mAdressListServerWaitingConnection = new ArrayList<>();
@@ -90,13 +90,11 @@ public class BluetoothManager {
 
 
     public void selectServerMode() {
-        mType = TypeBluetooth.Server;
+        typeBluetooth = TypeBluetooth.Server;
         setServerBluetoothName();
     }
 
     private void setServerBluetoothName() {
-//        setOldBTDeviceName();
-
         if (mBluetoothAdapter.getName().startsWith("TS") || mBluetoothAdapter.getName().startsWith("TSS")) {
             String deviceName = mBluetoothAdapter.getName();
             String[] oldDeviceName = deviceName.split("\\$");
@@ -120,11 +118,11 @@ public class BluetoothManager {
 
 
     public void selectClientMode() {
-        mType = TypeBluetooth.Client;
+        typeBluetooth = TypeBluetooth.Client;
     }
 
     public void resetMode() {
-        mType = TypeBluetooth.None;
+        typeBluetooth = TypeBluetooth.None;
     }
 
 
@@ -221,7 +219,7 @@ public class BluetoothManager {
     }
 
     public BluetoothManager.TypeBluetooth getTypeBluetooth() {
-        return mType;
+        return typeBluetooth;
     }
 
     private void resetAllOtherWaitingThreadServer() {
@@ -240,7 +238,7 @@ public class BluetoothManager {
     }
 
     public void createClient(String addressMac) {
-        if (mType == TypeBluetooth.Client) {
+        if (typeBluetooth == TypeBluetooth.Client) {
             mBluetoothClient = new BluetoothClient(mBluetoothAdapter, mUuiDappIdentifier, addressMac, mActivity);
             mThreadClient = new Thread(mBluetoothClient);
             mThreadClient.start();
@@ -248,14 +246,14 @@ public class BluetoothManager {
     }
 
     public void onClientConnectionSuccess(){
-        if (mType == TypeBluetooth.Client) {
+        if (typeBluetooth == TypeBluetooth.Client) {
             isConnected = true;
             cancelDiscovery();
         }
     }
 
     public boolean createServer(String address) {
-        if (mType == TypeBluetooth.Server && !mAdressListServerWaitingConnection.contains(address)) {
+        if (typeBluetooth == TypeBluetooth.Server && !mAdressListServerWaitingConnection.contains(address)) {
             BluetoothServer mBluetoothServer = new BluetoothServer(mBluetoothAdapter, mUuiDappIdentifier, address, mActivity);
             Thread threadServer = new Thread(mBluetoothServer);
             threadServer.start();
@@ -311,7 +309,7 @@ public class BluetoothManager {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                if (mType != null && isConnected) {
+                if (typeBluetooth != null && isConnected) {
                     if (mServeurConnectedList != null) {
                         for (BluetoothServer bluetoothServer : mServeurConnectedList) {
                             bluetoothServer.writeString(message);
@@ -331,7 +329,7 @@ public class BluetoothManager {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                if (mType != null && isConnected) {
+                if (typeBluetooth != null && isConnected) {
                     if (mServeurConnectedList != null) {
                         for (BluetoothServer bluetoothServer : mServeurConnectedList) {
                             if (bluetoothServer.getClientAddress().equals(adressMacTarget)) {
@@ -349,12 +347,12 @@ public class BluetoothManager {
     }
 
     public void sendStringMessageExeptSpecifiedAddress(final String adressMacTarget, final String message) {
-        if(mType  == TypeBluetooth.Server) {
+        if(typeBluetooth  == TypeBluetooth.Server) {
             Log.e("", "===> sendMessage ");
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
-                    if (mType != null && isConnected) {
+                    if (typeBluetooth != null && isConnected) {
                         if (mServeurConnectedList != null) {
                             for (BluetoothServer bluetoothServer : mServeurConnectedList) {
                                 if (!bluetoothServer.getClientAddress().equals(adressMacTarget)) {
@@ -401,7 +399,7 @@ public class BluetoothManager {
     }
 
     public void disconnectClient() {
-        mType = TypeBluetooth.None;
+        typeBluetooth = TypeBluetooth.None;
         resetClient();
     }
 
@@ -445,7 +443,7 @@ public class BluetoothManager {
 
         cancelDiscovery();
 
-        if (mType != null) {
+        if (typeBluetooth != null) {
             resetAllThreadServer();
             resetClient();
         }

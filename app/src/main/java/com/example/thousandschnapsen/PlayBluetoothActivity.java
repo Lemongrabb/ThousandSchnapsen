@@ -123,9 +123,6 @@ public class PlayBluetoothActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if(discoverDevice == true && !isFinishing()) enableDiscoverDevice();
-
-
-
     }
 
     @Override
@@ -288,11 +285,6 @@ public class PlayBluetoothActivity extends AppCompatActivity {
         dialog.setCanceledOnTouchOutside(false);
         dialog.show();
     }
-
-
-
-
-
 
     //uprawnienia
     private void requestLocationCorasePermission() {

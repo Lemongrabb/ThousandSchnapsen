@@ -5,6 +5,8 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,37 +60,47 @@ public class DeviceListAdapter extends ArrayAdapter<BluetoothDevice> {
 
                 Button joinServerButton =  convertView.findViewById(R.id.button_join_server);
 
-                String[] dividedDeviceName = device.getName().split(" ");
-                tVNumberOfPlayers.setText(Integer.parseInt(dividedDeviceName[3])+1 + "/3");
+                final String[] dividedDeviceName = device.getName().split(" ");
+                final int numberOfPLayers = Integer.parseInt(dividedDeviceName[3])+1;
+                int maxPlayers = Integer.parseInt(dividedDeviceName[4])+1;
+                if (Integer.parseInt(dividedDeviceName[3]) == Integer.parseInt(dividedDeviceName[4])){
+                    tVNumberOfPlayers.setText(numberOfPLayers + "/" + maxPlayers);
+                    tVNumberOfPlayers.setTextColor(Color.RED);
+                }
+                else {
+                    tVNumberOfPlayers.setText(numberOfPLayers + "/" + maxPlayers);
+                    tVNumberOfPlayers.setTextColor(deviceName.getTextColors());
+                    joinServerButton.setOnClickListener(new View.OnClickListener(){
+                        @Override
+                        public void onClick(View v) {
+                            buttonClick = true;
+                            Log.d(TAG, "onItemClick: You Clicked on a device.");
+                            String deviceName = device.getName();
+                            String deviceAddress = device.getAddress();
+
+                            Log.d(TAG, "onItemClick: deviceName = " + deviceName);
+                            Log.d(TAG, "onItemClick: deviceAddress = " + deviceAddress);
+
+                            mBluetoothAdapter.cancelDiscovery();
+
+                            Intent intent = new Intent(mContext, GameBluetoothActivity.class);
+                            intent.putExtra("DEVICE_NAME", device.getName());
+                            intent.putExtra("DEVICE_ADDRESS", device.getAddress());
+                            intent.putExtra("BT_DEVICE", device);
+                            intent.putExtra("PLAYER_NICK_NAME", playerNickName);
+                            intent.putExtra("PLAYER_NICK_NAME", playerNickName);
+                            intent.putExtra("CLIENT_NUMBER_OF_PLAYERS", numberOfPLayers);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                            mContext.startActivity(intent);
+                            ((Activity)mContext).finish();
+                        }
+                    });
+                }
                 deviceName.setText(dividedDeviceName[1]);
 
-                joinServerButton.setOnClickListener(new View.OnClickListener(){
-                    @Override
-                    public void onClick(View v) {
-                        buttonClick = true;
-                        Log.d(TAG, "onItemClick: You Clicked on a device.");
-                        String deviceName = device.getName();
-                        String deviceAddress = device.getAddress();
 
-                        Log.d(TAG, "onItemClick: deviceName = " + deviceName);
-                        Log.d(TAG, "onItemClick: deviceAddress = " + deviceAddress);
-
-                        mBluetoothAdapter.cancelDiscovery();
-
-                        Intent intent = new Intent(mContext, GameBluetoothActivity.class);
-                        intent.putExtra("DEVICE_NAME", device.getName());
-                        intent.putExtra("DEVICE_ADDRESS", device.getAddress());
-                        intent.putExtra("BT_DEVICE", device);
-                        intent.putExtra("PLAYER_NICK_NAME", playerNickName);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                        mContext.startActivity(intent);
-                        ((Activity)mContext).finish();
-
-
-                    }
-                });
             }
         }
         return convertView;
