@@ -35,7 +35,6 @@ public class BluetoothManager {
     private AppCompatActivity mActivity;
     public BluetoothAdapter mBluetoothAdapter;
     private BluetoothClient mBluetoothClient;
-    private ExecutorService mMessageSenderQueue;
 
     private ArrayList<String> mAdressListServerWaitingConnection;
     private HashMap<String, BluetoothServer> mServeurWaitingConnectionList;
@@ -47,7 +46,7 @@ public class BluetoothManager {
     private int mNbrClientConnection;
     public TypeBluetooth typeBluetooth;
     private int mTimeDiscoverable;
-    public boolean isConnected;
+    private boolean isConnected;
     private boolean mBluetoothIsEnableOnStart;
     private String mBluetoothNameSaved;
     private String mUuiDappIdentifier;
@@ -57,10 +56,9 @@ public class BluetoothManager {
     private Thread mThreadClient;
     private String serverName;
     private String playerAdminName;
-    private String myAddressMac = "";
 
     public BluetoothManager(AppCompatActivity activity) {
-        mActivity = (AppCompatActivity) activity;
+        mActivity = activity;
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         mBluetoothNameSaved = mBluetoothAdapter.getName();
         mBluetoothIsEnableOnStart = mBluetoothAdapter.isEnabled();
@@ -121,7 +119,7 @@ public class BluetoothManager {
         typeBluetooth = TypeBluetooth.Client;
     }
 
-    public void resetMode() {
+    private void resetMode() {
         typeBluetooth = TypeBluetooth.None;
     }
 
@@ -132,7 +130,7 @@ public class BluetoothManager {
         }
     }
 
-    public int getNbrClientMax() {
+    private int getNbrClientMax() {
         return BLUETOOTH_NBR_CLIENT_MAX;
     }
 
@@ -140,7 +138,7 @@ public class BluetoothManager {
         return mNbrClientConnection;
     }
 
-    public void incrementNbrConnection() {
+    private void incrementNbrConnection() {
         mNbrClientConnection++;
         Log.e("", "===> incrementNbrConnection mNbrClientConnection : " + mNbrClientConnection);
         EventBus.getDefault().post(new HowManyPlayersEvent(mNbrClientConnection));
@@ -151,7 +149,7 @@ public class BluetoothManager {
         }
     }
 
-    public void decrementNbrConnection() {
+    private void decrementNbrConnection() {
         if (mNbrClientConnection == 0) {
             return;
         }
@@ -178,7 +176,7 @@ public class BluetoothManager {
     }
 
 
-    public void cancelDiscovery() {
+    private void cancelDiscovery() {
         mIsTimerCanceled = false;
             mBluetoothAdapter.cancelDiscovery();
             cancelDiscoveryTimer();
@@ -188,7 +186,7 @@ public class BluetoothManager {
 
 
 
-    public TimerTask createTimer(){
+    private TimerTask createTimer(){
         return new TimerTask() {
 
             @Override
@@ -218,9 +216,6 @@ public class BluetoothManager {
         mTimer = null;
     }
 
-    public BluetoothManager.TypeBluetooth getTypeBluetooth() {
-        return typeBluetooth;
-    }
 
     private void resetAllOtherWaitingThreadServer() {
         cancelDiscovery();
@@ -230,7 +225,7 @@ public class BluetoothManager {
                 Log.e("", "===> resetWaitingThreadServer BluetoothServer : " + bluetoothServerMap.getKey());
                 bluetoothServerMap.getValue().closeConnection();
                 Thread serverThread = mServeurThreadList.get(bluetoothServerMap.getKey());
-                serverThread.interrupt();
+                if (serverThread != null) serverThread.interrupt();
                 mServeurThreadList.remove(bluetoothServerMap.getKey());
                 it.remove();
             }
@@ -252,20 +247,16 @@ public class BluetoothManager {
         }
     }
 
-    public boolean createServer(String address) {
+    private void createServer(String address) {
         if (typeBluetooth == TypeBluetooth.Server && !mAdressListServerWaitingConnection.contains(address)) {
             BluetoothServer mBluetoothServer = new BluetoothServer(mBluetoothAdapter, mUuiDappIdentifier, address, mActivity);
             Thread threadServer = new Thread(mBluetoothServer);
             threadServer.start();
             setServerWaitingConnection(address, mBluetoothServer, threadServer);
-//            IntentFilter bondStateIntent = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-            return true;
-        } else {
-            return false;
         }
     }
 
-    public void setServerWaitingConnection(String address, BluetoothServer bluetoothServer, Thread threadServer) {
+    private void setServerWaitingConnection(String address, BluetoothServer bluetoothServer, Thread threadServer) {
         mAdressListServerWaitingConnection.add(address);
         mServeurWaitingConnectionList.put(address, bluetoothServer);
         mServeurThreadList.put(address, threadServer);
@@ -380,7 +371,7 @@ public class BluetoothManager {
 
     }
 
-    public void isBluetoothOnListExist(BluetoothDevice device){
+    private void isBluetoothOnListExist(BluetoothDevice device){
             if (!mAdressListServerWaitingConnection.contains(device.getAddress())) {
                 Log.d("isBluetoothOnListExist","Creating server thread for" + device.getName() + "  " + device.getAddress());
                 String nickName = getNickName(device);
@@ -409,7 +400,7 @@ public class BluetoothManager {
         isConnected = false;
     }
 
-    public void resetClient() {
+    private void resetClient() {
         if (mBluetoothClient != null) {
             mBluetoothClient.closeConnection();
             if(null != mThreadClient){
@@ -420,7 +411,7 @@ public class BluetoothManager {
         }
     }
 
-    public void resetAllThreadServer(){
+    private void resetAllThreadServer(){
         for (Iterator<Map.Entry<String, BluetoothServer>> it = mServeurWaitingConnectionList.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<String, BluetoothServer> bluetoothServerMap = it.next();
             listOfConnectedPlayers.clear();
@@ -446,10 +437,6 @@ public class BluetoothManager {
         if (typeBluetooth != null) {
             resetAllThreadServer();
             resetClient();
-        }
-
-        try {
-        } catch (Exception e) {
         }
 
         if (!mBluetoothIsEnableOnStart) {

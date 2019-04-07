@@ -88,7 +88,6 @@ public class DeviceListAdapter extends ArrayAdapter<BluetoothDevice> {
                             intent.putExtra("DEVICE_ADDRESS", device.getAddress());
                             intent.putExtra("BT_DEVICE", device);
                             intent.putExtra("PLAYER_NICK_NAME", playerNickName);
-                            intent.putExtra("PLAYER_NICK_NAME", playerNickName);
                             intent.putExtra("CLIENT_NUMBER_OF_PLAYERS", numberOfPLayers);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
