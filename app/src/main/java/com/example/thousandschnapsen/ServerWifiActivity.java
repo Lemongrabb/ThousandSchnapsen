@@ -344,6 +344,8 @@ public class ServerWifiActivity extends AppCompatActivity {
         super.onDestroy();
         scheduleTaskExecutor.shutdown();
         sendBroadcast(serverIp + "," + serverName + "," + onlinePlayers + "," + maxPlayer + ",", "0");
+        android.os.SystemClock.sleep(500);
+        sendBroadcast(serverIp + "," + serverName + "," + onlinePlayers + "," + maxPlayer + ",", "0");
         try {
             serverSocket.close();
             if(clientSocket!=null) {
