@@ -135,8 +135,8 @@ public class ServerWifiActivity extends AppCompatActivity {
 
     private void showNoIpAddres(Context c) {
         AlertDialog dialog = new AlertDialog.Builder(c)
-                .setTitle("Graj przez Wifi")
-                .setMessage("Nie jestes polaczony z siecia wifi lub nie posiadasz prawodlowo nadanego adresu ip.")
+                .setTitle("Błąd połączenia z siecią lokalną")
+                .setMessage("Nie jesteś połączony z siecią wifi lub nie posiadasz prawidłowo nadanego adresu ip.")
                 .setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
