@@ -58,9 +58,12 @@ public class PlayBluetoothActivity extends AppCompatActivity {
             final String action = intent.getAction();
             Log.d(TAG, "onReceive: ACTION FOUND.");
 
-            if (action.equals(BluetoothDevice.ACTION_FOUND) || action.equals(BluetoothDevice.ACTION_NAME_CHANGED)) {
+            if (BluetoothDevice.ACTION_FOUND.equals(action) || BluetoothDevice.ACTION_NAME_CHANGED.equals(action)) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                if (device.getName().startsWith("TSS") && !mBTDevices.contains(device)) {
+                if ((device.getName() == null)){
+                    Log.d("PlaybluetoothActivity: ", "Device with null name, ignoring...");
+                }
+                else if (device.getName().startsWith("TSS") && !mBTDevices.contains(device)) {
                     mBTDevices.add(device);
                     Log.d(TAG, "onReceive: " + device.getName() + ": " + device.getAddress());
                 }
@@ -119,10 +122,7 @@ public class PlayBluetoothActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if(discoverDevice == true && !isFinishing()) enableDiscoverDevice();
-
-
-
+        if(discoverDevice && !isFinishing()) enableDiscoverDevice();
     }
 
     @Override
@@ -285,11 +285,6 @@ public class PlayBluetoothActivity extends AppCompatActivity {
         dialog.setCanceledOnTouchOutside(false);
         dialog.show();
     }
-
-
-
-
-
 
     //uprawnienia
     private void requestLocationCorasePermission() {
