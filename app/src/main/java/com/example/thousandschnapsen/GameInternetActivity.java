@@ -20,6 +20,7 @@ import org.json.JSONObject;
 public class GameInternetActivity extends AppCompatActivity {
 
     private Socket mSocket;
+    String isServer = "0";
     String serverName = "";
     String playerId = "";
     String playerNickName = "";
@@ -35,9 +36,12 @@ public class GameInternetActivity extends AppCompatActivity {
         SocketIO app = (SocketIO) getApplication();
         mSocket = app.getSocket();
 
+        isServer = getIntent().getStringExtra("IS_SERVER"); //IF VALUE "1" - DEVICE IS A SERVER, IF VALUE "0" - DEVICE IS A CLIENT
         serverName = getIntent().getStringExtra("SERVER_NAME");
         playerId = getIntent().getStringExtra("PLAYER_ID");
         playerNickName = getIntent().getStringExtra("PLAYER_NICK_NAME");
+
+        System.out.println(isServer + " " + serverName + " "  + playerId + " " + playerNickName);
 
         final LayoutInflater inflater = LayoutInflater.from(GameInternetActivity.this);
         final View view = inflater.inflate(R.layout.awaiting_for_players_dialog, null, false);

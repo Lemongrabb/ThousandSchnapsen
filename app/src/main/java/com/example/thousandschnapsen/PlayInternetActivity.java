@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -39,66 +41,89 @@ public class PlayInternetActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play_internet);
 
-        SocketIO app = (SocketIO) getApplication();
-        mSocket = app.getSocket();
-        if (!mSocket.connected()) {
-            mSocket.connect();
-        }
+        ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        mSocket.on("getId", new Emitter.Listener() {
-            @Override
-            public void call(final Object... args) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        String data = (String) args[0];
-                        playerId = data;
-                    }
-                });
+        if(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED) {
+
+            SocketIO app = (SocketIO) getApplication();
+            mSocket = app.getSocket();
+            if (!mSocket.connected()) {
+                mSocket.connect();
             }
-        });
 
-        mSocket.on("getServers", new Emitter.Listener() {
-            @Override
-            public void call(final Object... args) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        JSONArray data = (JSONArray) args[0];
-                        ArrayList<Server> serversData = new ArrayList<>();
-
-                        for (int i = 0; i < data.length(); i++) {
-                            try {
-                                JSONObject obj = data.getJSONObject(i);
-                                String server_name = obj.getString("server_name");
-                                String number_of_players = obj.getString("number_of_players");
-                                String players_online = obj.getString("players_online");
-
-                                serversData.add(new Server(server_name, number_of_players, players_online));
-                                //System.out.println(server_name);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
+            mSocket.on("getId", new Emitter.Listener() {
+                @Override
+                public void call(final Object... args) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            String data = (String) args[0];
+                            playerId = data;
                         }
+                    });
+                }
+            });
 
-                        MyCustomAdapter adapter = new MyCustomAdapter(serversData, getApplicationContext());
+            mSocket.on("getServers", new Emitter.Listener() {
+                @Override
+                public void call(final Object... args) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            JSONArray data = (JSONArray) args[0];
+                            ArrayList<Server> serversData = new ArrayList<>();
 
-                        ListView serversListView = findViewById(R.id.servers_list_view);
-                        serversListView.setAdapter(adapter);
+                            for (int i = 0; i < data.length(); i++) {
+                                try {
+                                    JSONObject obj = data.getJSONObject(i);
+                                    String server_name = obj.getString("server_name");
+                                    String number_of_players = obj.getString("number_of_players");
+                                    String players_online = obj.getString("players_online");
 
-                    }
-                });
-            }
-        });
+                                    serversData.add(new Server(server_name, number_of_players, players_online));
+                                    //System.out.println(server_name);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
 
-        showSetNickNameDialog(PlayInternetActivity.this);
+                            MyCustomAdapter adapter = new MyCustomAdapter(serversData, getApplicationContext());
 
-        final Button buttonCreateServer = findViewById(R.id.buttonCreateServer);
-        buttonCreateServer.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                showCreateServerDialog(PlayInternetActivity.this);
-            }
-        });
+                            ListView serversListView = findViewById(R.id.servers_list_view);
+                            serversListView.setAdapter(adapter);
+
+                        }
+                    });
+                }
+            });
+
+            showSetNickNameDialog(PlayInternetActivity.this);
+
+            final Button buttonCreateServer = findViewById(R.id.buttonCreateServer);
+            buttonCreateServer.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    showCreateServerDialog(PlayInternetActivity.this);
+                }
+            });
+
+        } else {
+            showNoInternetDialog(PlayInternetActivity.this);
+        }
+    }
+
+    private void showNoInternetDialog(Context c) {
+        AlertDialog dialog = new AlertDialog.Builder(c)
+            .setMessage("Błąd połączenia z internetem!")
+            .setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    startActivity(new Intent(PlayInternetActivity.this, MainActivity.class));
+                }
+            })
+            .create();
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);
+        dialog.show();
     }
 
     private void showSetNickNameDialog(Context c) {
@@ -107,28 +132,28 @@ public class PlayInternetActivity extends AppCompatActivity {
         et_nickName.setLayoutParams(lp);
 
         AlertDialog dialog = new AlertDialog.Builder(c)
-                .setTitle("Graj przez Internet")
-                .setMessage("Podaj swój Nick")
-                .setView(et_nickName)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        playerNickName = et_nickName.getText().toString();
-                        if (playerNickName.isEmpty()) {
-                            showSetNickNameDialog(PlayInternetActivity.this);
-                        }
+            .setTitle("Graj przez Internet")
+            .setMessage("Podaj swój Nick")
+            .setView(et_nickName)
+            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    playerNickName = et_nickName.getText().toString();
+                    if (playerNickName.isEmpty()) {
+                        showSetNickNameDialog(PlayInternetActivity.this);
                     }
-                })
-                .setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        playerId = "";
-                        playerNickName = "";
-                        mSocket.disconnect();
-                        startActivity(new Intent(PlayInternetActivity.this, MainActivity.class));
-                    }
-                })
-                .create();
+                }
+            })
+            .setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    playerId = "";
+                    playerNickName = "";
+                    mSocket.disconnect();
+                    startActivity(new Intent(PlayInternetActivity.this, MainActivity.class));
+                }
+            })
+            .create();
         dialog.setCanceledOnTouchOutside(false);
         dialog.setCancelable(false);
         dialog.show();
@@ -158,46 +183,47 @@ public class PlayInternetActivity extends AppCompatActivity {
 //        });
 
         AlertDialog dialog = new AlertDialog.Builder(c)
-                .setTitle("Stwórz serwer w sieci Internet dla 3 graczy")
-                .setMessage("Podaj nazwę serwera")
-                .setView(view)
-                .setPositiveButton("Stwórz", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        serverName = et_server_name.getText().toString();
-                        if (/*(numberOfPlayers == 2 || numberOfPlayers == 3 || numberOfPlayers == 4) &&*/ !serverName.isEmpty()) {
-                            JSONObject serverData = new JSONObject();
-                            try {
-                                serverData.put("server_owner_id", playerId);
-                                serverData.put("server_owner_nick_name", playerNickName);
-                                serverData.put("server_name", serverName);
-                                serverData.put("number_of_players", numberOfPlayers);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                            mSocket.emit("createServer", serverData);
-                            joinServer(serverName, playerId, playerNickName);
-                        } else {
-                            showCreateServerDialog(PlayInternetActivity.this);
-                            Toast.makeText(getApplicationContext(), "Podaj nazwę serwera!", Toast.LENGTH_SHORT).show();
+            .setTitle("Stwórz serwer w sieci Internet dla 3 graczy")
+            .setMessage("Podaj nazwę serwera")
+            .setView(view)
+            .setPositiveButton("Stwórz", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    serverName = et_server_name.getText().toString();
+                    if (/*(numberOfPlayers == 2 || numberOfPlayers == 3 || numberOfPlayers == 4) &&*/ !serverName.isEmpty()) {
+                        JSONObject serverData = new JSONObject();
+                        try {
+                            serverData.put("server_owner_id", playerId);
+                            serverData.put("server_owner_nick_name", playerNickName);
+                            serverData.put("server_name", serverName);
+                            serverData.put("number_of_players", numberOfPlayers);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
+                        mSocket.emit("createServer", serverData);
+                        joinServer("1", serverName, playerId, playerNickName);
+                    } else {
+                        showCreateServerDialog(PlayInternetActivity.this);
+                        Toast.makeText(getApplicationContext(), "Podaj nazwę serwera!", Toast.LENGTH_SHORT).show();
                     }
-                })
-                .setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        numberOfPlayers = 3;
-                        serverName = "";
-                    }
-                })
-                .create();
+                }
+            })
+            .setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    numberOfPlayers = 3;
+                    serverName = "";
+                }
+            })
+            .create();
         dialog.setCanceledOnTouchOutside(false);
         dialog.show();
     }
 
-    public void joinServer(String serverName, String playerId, String playerNickName) {
-        //System.out.println(serverName + " "  + playerId + " " + playerNickName);
+    public void joinServer(String isServer, String serverName, String playerId, String playerNickName) {
+        //System.out.println(isServer + " " + serverName + " "  + playerId + " " + playerNickName);
         Intent intent = new Intent(getBaseContext(), GameInternetActivity.class);
+        intent.putExtra("IS_SERVER", isServer);
         intent.putExtra("SERVER_NAME", serverName);
         intent.putExtra("PLAYER_ID", playerId);
         intent.putExtra("PLAYER_NICK_NAME", playerNickName);
@@ -255,10 +281,9 @@ class MyCustomAdapter extends BaseAdapter implements ListAdapter {
         joinServerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PlayInternetActivity PlayInternetActivity = new PlayInternetActivity();
-                //PlayInternetActivity.joinServer(server_name, PlayInternetActivity.playerId, PlayInternetActivity.playerNickName);
                 Intent intent = new Intent(context, GameInternetActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("IS_SERVER", "0");
                 intent.putExtra("SERVER_NAME", server_name);
                 intent.putExtra("PLAYER_ID", com.example.thousandschnapsen.PlayInternetActivity.playerId);
                 intent.putExtra("PLAYER_NICK_NAME", com.example.thousandschnapsen.PlayInternetActivity.playerNickName);
