@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Socket;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -41,7 +42,7 @@ public class GameInternetActivity extends AppCompatActivity {
         playerId = getIntent().getStringExtra("PLAYER_ID");
         playerNickName = getIntent().getStringExtra("PLAYER_NICK_NAME");
 
-        System.out.println(isServer + " " + serverName + " "  + playerId + " " + playerNickName);
+        //System.out.println(isServer + " " + serverName + " "  + playerId + " " + playerNickName);
 
         final LayoutInflater inflater = LayoutInflater.from(GameInternetActivity.this);
         final View view = inflater.inflate(R.layout.awaiting_for_players_dialog, null, false);
@@ -82,20 +83,36 @@ public class GameInternetActivity extends AppCompatActivity {
 
                             tv_number_of_players_online.setText("Liczba graczy: " + online_players + " / " + max_players);
 
-                            if (Integer.parseInt(online_players) < Integer.parseInt(max_players)) {
+                            if (Integer.parseInt(online_players) < Integer.parseInt(max_players)) { //AWAITING FOR PLAYERS
                                 if (awaitingPlayers == false) {
                                     dialog.show();
                                     awaitingPlayers = true;
                                 }
                                 Toast.makeText(getApplicationContext(), "Liczba graczy: " + online_players + " / " + max_players, Toast.LENGTH_SHORT).show();
-                            } else {
+                            } else { //IF SERVER IS READY
                                 if (awaitingPlayers == true) {
                                     dialog.dismiss();
                                     awaitingPlayers = false;
+                                    if(isServer.equals("1")) {
+                                        mSocket.emit("getPlayers", serverName); //GET PLAYERS DATA - ID, NICKNAME
+                                        //RECEIVE PLAYERS DATA - ID, NICKNAME
+                                        mSocket.on("getPlayers", new Emitter.Listener() {
+                                            @Override
+                                            public void call(final Object... args) {
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    JSONArray data = (JSONArray) args[0]; //RECEIVED PLAYERS DATA
+                                                    System.out.println(data);
+                                                }
+                                            });
+                                            }
+                                        });
+                                    }
                                 }
                                 Toast.makeText(getApplicationContext(), "Serwer gotowy! Liczba graczy: " + online_players + " / " + max_players, Toast.LENGTH_SHORT).show();
                             }
-                            if (online_players == max_players) dialog.dismiss();
+                            //if (online_players == max_players) dialog.dismiss();
                         }
                     }
                 });
@@ -105,13 +122,13 @@ public class GameInternetActivity extends AppCompatActivity {
         mSocket.on("serverDisabled", new Emitter.Listener() {
             @Override
             public void call(final Object... args) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mSocket.disconnect();
-                        startActivity(new Intent(GameInternetActivity.this, MainActivity.class));
-                    }
-                });
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mSocket.disconnect();
+                    startActivity(new Intent(GameInternetActivity.this, MainActivity.class));
+                }
+            });
             }
         });
 
