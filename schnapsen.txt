@@ -1,0 +1,311 @@
+﻿Cards.Card
+Cards.Suit
+Cards.Deck
+Game.Schnapsen
+Game.Utils
+Game.Player
+
+
+//Zdefiniowanie karty jako obiektu składającego się z wartości i konkretnego koloru
+public class Card {
+    Suit suit;
+    Value value;
+    boolean empty = false;
+
+    public Card(Suit s, Value v) {
+        this.suit = s;
+        this.value = v;
+    }
+
+    public Card() {
+        this.empty = true;
+    }
+
+    public boolean equalTo(Card card) {
+        return card.suit == this.suit && card.value == this.value;
+    }
+
+    public String toString() {
+        return this.empty ? "N/A" : this.value.toString() + " " + this.suit.toStringVerbose();
+    }
+
+    public String toStringVerbose() {
+        return this.empty ? this.toString() : this.value.toStringVerbose() + " of " + this.suit.toStringVerbose();
+    }
+
+    public boolean isEmpty() {
+        return this.empty;
+    }
+
+	
+//Inicjalizowanie talii kart
+public class Deck {
+    Card[] deck;
+    private int CARDS_IN_SUIT = 7;
+    private int SUITS_IN_DECK = 4;
+    private int CARDS = 21;
+    Suit[] suits;
+    Value[] values;
+
+    public Deck() {
+        this.suits = new Suit[]{Suit.H, Suit.S, Suit.D, Suit.C};
+        this.values = new Value[]{Value.A, Value.T, Value.K, Value.Q, Value.J};
+        this.deck = new Card[21];
+
+        for(int i = 0; i < this.SUITS_IN_DECK; ++i) {
+            for(int j = 0; j < this.CARDS_IN_SUIT; ++j) {
+                int position = i * this.CARDS_IN_SUIT + j;
+                this.deck[position] = new Card(this.suits[i], this.values[j]); 
+            }
+        }
+
+    }
+
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+
+        for(int i = 0; i < this.CARDS; ++i) {
+            b.append(this.deck[i].toString() + "\n");
+        }
+
+        return b.toString();
+    }
+
+    public String toStringVerbose() {
+        StringBuilder b = new StringBuilder();
+
+        for(int i = 0; i < this.CARDS; ++i) {
+            b.append(this.deck[i].toStringVerbose() + "\n");
+        }
+
+        return b.toString();
+    }
+
+    public Card[] getDeckArray() {
+        return this.deck;
+    }
+}
+
+//Klasa z przypadkami koloru
+Suit.class
+public enum Suit {
+    H,
+    S,
+    D,
+    C;
+
+    private Suit() {
+    }
+
+    public String toString() {
+        switch($SWITCH_TABLE$Cards$Suit()[this.ordinal()]) {
+        case 1:
+            return "H";
+        case 2:
+            return "S";
+        case 3:
+            return "D";
+        case 4:
+            return "C";
+        default:
+            return "NO_SUCH_CARD";
+        }
+    }
+
+    public String toStringVerbose() {
+        switch($SWITCH_TABLE$Cards$Suit()[this.ordinal()]) {
+        case 1:
+            return "Hearts";
+        case 2:
+            return "Spades";
+        case 3:
+            return "Diamonds";
+        case 4:
+            return "Clubs";
+        default:
+            return "NO_SUCH_CARD";
+        }
+    }
+}
+
+
+//Klasa z przypadkami wartości
+Value.class
+
+public enum Value {
+    A,
+    T,
+    K,
+    Q,
+    J;
+
+    private Value() {
+    }
+
+    public int getScore() {
+        switch($SWITCH_TABLE$Cards$Value()[this.ordinal()]) {
+        case 1:
+            return 11;
+        case 2:
+            return 10;
+        case 3:
+            return 4;
+        case 4:
+            return 3;
+        case 5:
+            return 2;
+        default:
+            return 0;
+        }
+    }
+
+    public String toString() {
+        switch($SWITCH_TABLE$Cards$Value()[this.ordinal()]) {
+        case 1:
+            return "A";
+        case 2:
+            return "T";
+        case 3:
+            return "K";
+        case 4:
+            return "Q";
+        case 5:
+            return "J";
+        default:
+            return "NO_SUCH_CARD";
+        }
+    }
+
+    public String toStringVerbose() {
+        switch($SWITCH_TABLE$Cards$Value()[this.ordinal()]) {
+        case 1:
+            return "Ace";
+        case 2:
+            return "Ten";
+        case 3:
+            return "King";
+        case 4:
+            return "Queen";
+        case 5:
+            return "Jack";
+        default:
+            return "NO_SUCH_CARD";
+        }
+    }
+}
+
+player.class
+//obsługa gracza 
+public class Player {
+    Card[] cards = new Card[7];
+    Card selected;
+    int gamePoints = 0;
+    int gameScore = 0;
+    public int maxCards = 7;
+
+    public Player() {
+        for(int i = 0; i < this.maxCards; ++i) {
+            this.cards[i] = new Card();
+        }
+
+        this.selected = new Card();
+    }
+
+    public void playCard(Card card, int n) {
+        if ((card == null || card.isEmpty()) && n >= 0 && n < this.maxCards) {
+            this.selected = this.cards[n];
+            this.cards[n] = new Card();
+        } else {
+            for(int i = 0; i < this.maxCards; ++i) {
+                if (this.cards[n].equalTo(card)) {
+                    this.cards[n] = new Card();
+                }
+            }
+
+            this.selected = card;
+        }
+
+    }
+
+    public Card getCard(int n) {
+        Card card = this.cards[n];
+        return card == null ? new Card() : card;
+    }
+
+    public int getScore() {
+        return this.gameScore;
+    }
+
+    public void increaseScore(int score) {
+        this.gameScore += score;
+    }
+
+    public void resetScore() {
+        this.gameScore = 0;
+    }
+
+    public void dealCard(Card card) {
+        assert this.cards != null;
+
+        for(int i = 0; i < this.maxCards; ++i) {
+            if (this.cards[i] == null || this.cards[i].isEmpty()) {
+                this.cards[i] = card;
+                return;
+            }
+        }
+
+
+
+//Gra właściwa
+Schnapsen.class
+
+public class Schnapsen {
+    public Deck deck = new Deck();
+    Deque<Card> runningDeck = new ArrayDeque();
+   
+    Player p1 = new Player();
+    Player p2 = new Player();
+    Player p3 = new Player();
+    Suit trump;
+
+    public Schnapsen() {
+        this.printBoard();
+    }
+
+    public void dealCards() {
+        Utils.shuffle(this.deck.getDeckArray());
+        Card[] deckArr = this.deck.getDeckArray();
+
+        int k;
+        for(k = 0; k < 7; ++k) {
+            this.p1.dealCard(deckArr[k]);
+        }
+
+        for(k = 7; k < 14; ++k) {
+            this.p2.dealCard(deckArr[k]);
+        }
+
+        for(k = 14; k < 21; ++k) {
+             this.p3.dealCard(deckArr[k]);
+        }
+
+    }
+
+    public void completeTrick() {
+        Utils.score(this.p1, this.p1.selected, this.p2, this.p2.selected,  this.p3, this.p3.selectedthis.trump);
+        this.p1.selected = new Card();
+        this.p2.selected = new Card();
+	this.p3.selected = new Card();
+        Utils.dealCard(this.p1, this);
+        Utils.dealCard(this.p2, this);
+	Utils.dealCard(this.p3, this);
+    }
+
+    
+
+    
+
+    public String getStatsString() {
+        return "Game Score: P1(" + String.valueOf(this.p1.gameScore) + ") - P2(" + this.p2.gameScore + ") - P3(" + this.p3.gameScore + ")" + "Game Points: P1(" + this.p1.gamePoints + ") - P2(" + this.p2.gamePoints + ") - P3(" + this.p3.gamePoints + ")";
+    }
+}
