@@ -6,11 +6,15 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.android.gms.ads.MobileAds;
+
 public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        MobileAds.initialize(this, "ca-app-pub-3940256099942544~3347511713");
 
         final Button buttonPlayInternet = findViewById(R.id.buttonPlayInternet);
         buttonPlayInternet.setOnClickListener(new View.OnClickListener() {

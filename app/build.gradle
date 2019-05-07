@@ -28,5 +28,6 @@ dependencies {
     implementation 'com.github.nkzawa:socket.io-client:0.3.0'
     implementation 'org.jetbrains:annotations-java5:15.0'
     implementation 'org.greenrobot:eventbus:3.1.1'
+    implementation 'com.google.android.gms:play-services-ads:17.2.0'
 
 }
