@@ -27,7 +27,6 @@ public class BluetoothManager {
         None;
     }
 
-
     public static final int BLUETOOTH_TIME_DICOVERY_600_SEC = 600;
 
     private static int BLUETOOTH_NBR_CLIENT_MAX = 7;
