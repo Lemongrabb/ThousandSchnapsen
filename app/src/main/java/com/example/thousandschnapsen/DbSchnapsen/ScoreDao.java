@@ -28,9 +28,9 @@ public class ScoreDao extends DbManager {
         mDbManager.close();
     }
 
-    public static Score loadRecordById(int mid_scroe)  { 
+    public static Score loadRecordById(int mid_score)  {
         database_open();
-        Cursor cursor = database.query(DbSchema.Table_Score.TABLE_NAME,allColumns,  "id_scroe = ?" , new String[] { String.valueOf(mid_scroe) } , null, null, null,null);
+        Cursor cursor = database.query(DbSchema.Table_Score.TABLE_NAME,allColumns,  "id_score = ?" , new String[] { String.valueOf(mid_score) } , null, null, null,null);
 
         if (cursor != null)
             cursor.moveToFirst();
@@ -112,16 +112,16 @@ public class ScoreDao extends DbManager {
         ContentValues values = new ContentValues();
         values = getScoreValues(score);
         database_open();
-        String[] where = new String[] { String.valueOf(score.getid_scroe()) }; 
-        int updatedId = database.update(DbSchema.Table_Score.TABLE_NAME , values, DbSchema.Table_Score.COL_ID_SCROE + " = ? ",where );
+        String[] where = new String[] { String.valueOf(score.getid_score()) };
+        int updatedId = database.update(DbSchema.Table_Score.TABLE_NAME , values, DbSchema.Table_Score.COL_ID_SCORE + " = ? ",where );
         database_close();
         return updatedId;
     }
 
     public static int deleteRecord(Score score) { 
         database_open();
-        String[] where = new String[] { String.valueOf(score.getid_scroe()) }; 
-        int deletedCount = database.delete(DbSchema.Table_Score.TABLE_NAME , DbSchema.Table_Score.COL_ID_SCROE + " = ? ",where );
+        String[] where = new String[] { String.valueOf(score.getid_score()) };
+        int deletedCount = database.delete(DbSchema.Table_Score.TABLE_NAME , DbSchema.Table_Score.COL_ID_SCORE + " = ? ",where );
         database_close();
         return deletedCount;
     }
@@ -129,7 +129,7 @@ public class ScoreDao extends DbManager {
     public static int deleteRecord(String id) {
         database_open();
         String[] where = new String[] { id }; 
-        int deletedCount = database.delete(DbSchema.Table_Score.TABLE_NAME , DbSchema.Table_Score.COL_ID_SCROE + " = ? ",where );
+        int deletedCount = database.delete(DbSchema.Table_Score.TABLE_NAME , DbSchema.Table_Score.COL_ID_SCORE + " = ? ",where );
         database_close();
         return deletedCount;
     }
@@ -144,7 +144,7 @@ public class ScoreDao extends DbManager {
     protected static ContentValues getScoreValues(Score score) {
         ContentValues values = new ContentValues();
 
-        values.put(DbSchema.Table_Score.COL_ID_SCROE, score.getid_scroe());
+        values.put(DbSchema.Table_Score.COL_ID_SCORE, score.getid_score());
         values.put(DbSchema.Table_Score.COL_SCORE, score.getscore());
 
         return values;
@@ -153,7 +153,7 @@ public class ScoreDao extends DbManager {
     protected static Score cursorToScore(Cursor cursor)  {
         Score score = new Score();
 
-        score.setid_scroe(cursor.getInt(cursor.getColumnIndex(DbSchema.Table_Score.COL_ID_SCROE)));
+        score.setid_score(cursor.getInt(cursor.getColumnIndex(DbSchema.Table_Score.COL_ID_SCORE)));
         score.setscore(cursor.getString(cursor.getColumnIndex(DbSchema.Table_Score.COL_SCORE)));
 
         return score;

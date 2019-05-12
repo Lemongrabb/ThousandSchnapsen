@@ -164,12 +164,12 @@ public class DbSchema {
         public static final String TABLE_NAME = "score";
 
         // Table Columns
-        public static final String COL_ID_SCROE = "id_scroe";
+        public static final String COL_ID_SCORE = "id_score";
         public static final String COL_SCORE = "score";
 
         // Create Table Statement
         public static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS score ( " + 
-            COL_ID_SCROE + " INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,  " + 
+            COL_ID_SCORE + " INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,  " +
             COL_SCORE + " TEXT );";
 
         // Drop table statement
@@ -177,7 +177,7 @@ public class DbSchema {
 
         // Columns list array
         public static final String[] allColumns = {
-            COL_ID_SCROE,
+            COL_ID_SCORE,
             COL_SCORE };
     }
 
