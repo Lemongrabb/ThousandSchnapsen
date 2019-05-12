@@ -74,7 +74,11 @@ public class GameBluetoothActivity extends AppCompatActivity {
             if (BluetoothDevice.ACTION_FOUND.equals(action) || BluetoothDevice.ACTION_NAME_CHANGED.equals(action)) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 Log.d(TAG, "mServerBroadcastReceiver: " + device.getName() + ": " + device.getAddress());
-                bluetoothManager.ifTheDeviceIsForThisGame(device);
+                int rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);
+                if(rssi == -32768){
+                    Log.d(TAG, "Ghost server, ignoring...");
+                }
+                else bluetoothManager.ifTheDeviceIsForThisGame(device);
             }
         }
     };

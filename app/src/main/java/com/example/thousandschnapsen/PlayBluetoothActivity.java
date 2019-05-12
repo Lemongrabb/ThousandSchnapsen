@@ -34,7 +34,7 @@ import androidx.core.app.ActivityCompat;
 
 public class PlayBluetoothActivity extends AppCompatActivity {
 
-    private static final String TAG = "PlayBluetoothActivity";
+    private static final String TAG = "PlayBluetoothActivity: ";
     private static final int COARSE_LOCATION_CODE = 1;
     private static final int DISCOVERABLE_DURATION = 600; // widoczność urządzenia 10min
 
@@ -60,12 +60,16 @@ public class PlayBluetoothActivity extends AppCompatActivity {
 
             if (BluetoothDevice.ACTION_FOUND.equals(action) || BluetoothDevice.ACTION_NAME_CHANGED.equals(action)) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                int rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);
                 if ((device.getName() == null)){
-                    Log.d("PlaybluetoothActivity: ", "Device with null name, ignoring...");
+                    Log.d(TAG, "Device with null name, ignoring...");
+                }
+                if (rssi == -32768){
+                    Log.d(TAG, "Ghost server, ignoring...");
                 }
                 else if (device.getName().startsWith("TSS") && !mBTDevices.contains(device)) {
                     mBTDevices.add(device);
-                    Log.d(TAG, "onReceive: " + device.getName() + ": " + device.getAddress());
+                    Log.d(TAG, "onReceive: " + device.getName() + ": " + device.getAddress()+ "  RSSI: "+ rssi);
                 }
 
                 if (!((mBTDevices) == mBTDevicesOld)) {
@@ -77,8 +81,6 @@ public class PlayBluetoothActivity extends AppCompatActivity {
             }
         }
     };
-
-
 
 
     @Override
