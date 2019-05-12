@@ -3,7 +3,7 @@ import android.content.Context;
 
 import com.example.thousandschnapsen.DbSchnapsen.DbManager;
 
-public class ExpenseApplication extends Application {
+public class SchnapsenApplication extends Application {
 
     private static Context context;
 
