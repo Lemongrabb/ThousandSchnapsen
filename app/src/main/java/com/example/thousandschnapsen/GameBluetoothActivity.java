@@ -104,12 +104,23 @@ public class GameBluetoothActivity extends AppCompatActivity {
             message = "";
         }
         //Jeśłi został wysłana wiadomość kontrolna to rozpocznij grę
-        if (message.equals("$$") && serverName == null && !gameReady) {
+        if (message.equals("$READY$") && serverName == null && !gameReady) {
             hideDialog();
             toastMsg("Rozpoczynamy grę");
             gameReady = true;
+        }
+        if (message.equals("$!READY$") && serverName == null && gameReady) {
+            changeText(2);
+            toastMsg("Liczba graczy: 2/" +MAX_NUMBER_OF_PLAYERS);
+            gameReady = false;
+        }
+        if (message.startsWith("$NUM_PLAYERS$")){
+            String[] numPlayers = message.split("$NUM_PLAYERS$");
+            changeText(Integer.parseInt(numPlayers[1]));
+            toastMsg("Liczba graczy: "+numPlayers[1]+"/" +MAX_NUMBER_OF_PLAYERS);
 
         }
+
     }
 
     //Jeśli udało się połączyć się z serwerm
@@ -142,7 +153,7 @@ public class GameBluetoothActivity extends AppCompatActivity {
             gameReady = true;
             scanDevices = false;    //Przerwij skanowanie urządzeń bt dla serwera
             bluetoothManager.cancelDiscoveryTimer();
-            bluetoothManager.sendStringMessageForAll("$$");  //Wyślij znak specjalny do innych urządzeń, że wszystkie urządzenia są gotowe
+            bluetoothManager.sendStringMessageForAll("$READY$");  //Wyślij znak specjalny do innych urządzeń, że wszystkie urządzenia są gotowe
             hideDialog();
             toastMsg("Rozpoczynamy grę");
 
@@ -155,6 +166,7 @@ public class GameBluetoothActivity extends AppCompatActivity {
             int numberOfPlayers = bluetoothManager.getmNbrClientConnection() + 1;
             changeText(numberOfPlayers);
             toastMsg("Liczba graczy: " + numberOfPlayers + " / " + MAX_NUMBER_OF_PLAYERS);
+            bluetoothManager.sendStringMessageForAll("$NUM_PLAYERS$"+numberOfPlayers);
         }
     }
 
@@ -166,7 +178,16 @@ public class GameBluetoothActivity extends AppCompatActivity {
         Log.d("ServerConnection: ","Device: " + clientAddress.getClientAddress() + " disconnected");
         if (!gameReady){
             changeText(numberOfPlayers);
-            toastMsg("Liczba graczy: " + numberOfPlayers + " / " + MAX_NUMBER_OF_PLAYERS);
+            toastMsg("Liczba graczy: " + numberOfPlayers + "/" + MAX_NUMBER_OF_PLAYERS);
+        }
+        if(gameReady){
+            gameReady = false;
+            Log.d("ServerConnection: ","Device: " + clientAddress.getClientAddress() + " disconnected");
+            changeText(numberOfPlayers);
+            toastMsg("Liczba graczy: "+numberOfPlayers+"/" +MAX_NUMBER_OF_PLAYERS);
+            bluetoothManager.sendStringMessageForAll("$NUM_PLAYERS$"+numberOfPlayers);
+            bluetoothManager.startDiscoveryforServer();
+            scanDevices = true;
         }
 
     }
