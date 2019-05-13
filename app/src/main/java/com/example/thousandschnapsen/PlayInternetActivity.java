@@ -43,14 +43,17 @@ public class PlayInternetActivity extends AppCompatActivity {
 
         ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
 
+        //CHECK INTERNET CONNECTION
         if(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED) {
 
+            //SOCKETIO INITIALIZATION
             SocketIO app = (SocketIO) getApplication();
             mSocket = app.getSocket();
             if (!mSocket.connected()) {
                 mSocket.connect();
             }
 
+            //GET ID OF CONNECTED PLAYER
             mSocket.on("getId", new Emitter.Listener() {
                 @Override
                 public void call(final Object... args) {
@@ -64,6 +67,7 @@ public class PlayInternetActivity extends AppCompatActivity {
                 }
             });
 
+            //GET CURRENT SERVERS
             mSocket.on("getServers", new Emitter.Listener() {
                 @Override
                 public void call(final Object... args) {
@@ -87,6 +91,7 @@ public class PlayInternetActivity extends AppCompatActivity {
                                 }
                             }
 
+                            //LOAD CURRENT SERVERS TO LISTVIEW
                             MyCustomAdapter adapter = new MyCustomAdapter(serversData, getApplicationContext());
 
                             ListView serversListView = findViewById(R.id.servers_list_view);
@@ -97,8 +102,10 @@ public class PlayInternetActivity extends AppCompatActivity {
                 }
             });
 
+            //FUNCTION DISPLAYING A WINDOW ASKING FOR NICKNAME
             showSetNickNameDialog(PlayInternetActivity.this);
 
+            //BUTTON WITH THE FUNCTION CREATING A SERVER WITH A GIVEN NAME
             final Button buttonCreateServer = findViewById(R.id.buttonCreateServer);
             buttonCreateServer.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
@@ -111,6 +118,7 @@ public class PlayInternetActivity extends AppCompatActivity {
         }
     }
 
+    //FUNCTION INFORMING ABOUT THE LACK OF INTERNET
     private void showNoInternetDialog(Context c) {
         AlertDialog dialog = new AlertDialog.Builder(c)
             .setMessage("Błąd połączenia z internetem!")
@@ -126,6 +134,7 @@ public class PlayInternetActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    //FUNCTION ASKING FOR NICKNAME
     private void showSetNickNameDialog(Context c) {
         final EditText et_nickName = new EditText(c);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
@@ -159,6 +168,7 @@ public class PlayInternetActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    //SERVER CREATION FUNCTION
     private void showCreateServerDialog(Context c) {
         numberOfPlayers = 3;
         serverName = "";
@@ -200,6 +210,7 @@ public class PlayInternetActivity extends AppCompatActivity {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
+                        //PASS DATA TO CREATE REMOTE SERVER
                         mSocket.emit("createServer", serverData);
                         joinServer("1", serverName, playerId, playerNickName);
                     } else {
@@ -220,6 +231,7 @@ public class PlayInternetActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    //FINAL FUNCTION TO CREATE SERVER AND CHANGE SCENE TO GameInternetActivity
     public void joinServer(String isServer, String serverName, String playerId, String playerNickName) {
         //System.out.println(isServer + " " + serverName + " "  + playerId + " " + playerNickName);
         Intent intent = new Intent(getBaseContext(), GameInternetActivity.class);
@@ -231,6 +243,7 @@ public class PlayInternetActivity extends AppCompatActivity {
     }
 }
 
+//LIST OF SERVERS ADPATER
 class MyCustomAdapter extends BaseAdapter implements ListAdapter {
     ArrayList<Server> arrayList;
     private Context context;
@@ -301,6 +314,7 @@ class MyCustomAdapter extends BaseAdapter implements ListAdapter {
     }
 }
 
+//ASSISTANT CLASS TO ADAPTER OF LISTVIEW - SERVER OBJECT
 class Server {
     String server_name;
     String number_of_players;

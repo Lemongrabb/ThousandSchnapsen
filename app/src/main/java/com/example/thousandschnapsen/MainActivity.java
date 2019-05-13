@@ -12,12 +12,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //PLAY INTERNET
         final Button buttonPlayInternet = findViewById(R.id.buttonPlayInternet);
         buttonPlayInternet.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, PlayInternetActivity.class));
             }
         });
+
+        //PLAY BLUETOOTH
         final Button buttonPlayBluetooth = findViewById(R.id.buttonPlayBluetooth);
         buttonPlayBluetooth.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -27,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    //PLAY WIFI
     public void grajWifi(View view) {
         startActivity(new Intent(MainActivity.this, PlayWifiActivity.class));
     }
