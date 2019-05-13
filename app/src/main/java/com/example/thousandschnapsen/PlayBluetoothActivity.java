@@ -403,29 +403,6 @@ public class PlayBluetoothActivity extends AppCompatActivity {
         mTimer.cancel();
         mTimer = null;
     }
-
-//    public static class MyReceiver extends BroadcastReceiver {
-//
-//        private final Handler handler; // Handler used to execute code on the UI thread
-//
-//        public MyReceiver(Handler handler) {
-//            this.handler = handler;
-//        }
-//
-//        @Override
-//        public void onReceive(final Context context, Intent intent) {
-//            // Post the UI updating code to our Handler
-//            handler.post(new Runnable() {
-//                @Override
-//                public void run() {
-//                    Toast.makeText(context, "Toast from broadcast receiver", Toast.LENGTH_SHORT).show();
-//                }
-//            });
-//        }
-
-
-
-
 }
 
 
