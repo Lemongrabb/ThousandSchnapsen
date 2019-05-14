@@ -34,7 +34,7 @@ import androidx.core.app.ActivityCompat;
 
 public class PlayBluetoothActivity extends AppCompatActivity {
 
-    private static final String TAG = "PlayBluetoothActivity";
+    private static final String TAG = "PlayBluetoothActivity: ";
     private static final int COARSE_LOCATION_CODE = 1;
     private static final int DISCOVERABLE_DURATION = 600; // widoczność urządzenia 10min
 
@@ -60,12 +60,16 @@ public class PlayBluetoothActivity extends AppCompatActivity {
 
             if (BluetoothDevice.ACTION_FOUND.equals(action) || BluetoothDevice.ACTION_NAME_CHANGED.equals(action)) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                int rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);
+                Log.d(TAG, "onReceive: " + device.getName() + ": " + device.getAddress()+ "  RSSI: "+ rssi);
                 if ((device.getName() == null)){
-                    Log.d("PlaybluetoothActivity: ", "Device with null name, ignoring...");
+                    Log.d(TAG, "Device with null name, ignoring...");
+                }
+                else if (rssi == -32768){
+                    Log.d(TAG, "Ghost server, ignoring...");
                 }
                 else if (device.getName().startsWith("TSS") && !mBTDevices.contains(device)) {
                     mBTDevices.add(device);
-                    Log.d(TAG, "onReceive: " + device.getName() + ": " + device.getAddress());
                 }
 
                 if (!((mBTDevices) == mBTDevicesOld)) {
@@ -77,8 +81,6 @@ public class PlayBluetoothActivity extends AppCompatActivity {
             }
         }
     };
-
-
 
 
     @Override
@@ -401,29 +403,6 @@ public class PlayBluetoothActivity extends AppCompatActivity {
         mTimer.cancel();
         mTimer = null;
     }
-
-//    public static class MyReceiver extends BroadcastReceiver {
-//
-//        private final Handler handler; // Handler used to execute code on the UI thread
-//
-//        public MyReceiver(Handler handler) {
-//            this.handler = handler;
-//        }
-//
-//        @Override
-//        public void onReceive(final Context context, Intent intent) {
-//            // Post the UI updating code to our Handler
-//            handler.post(new Runnable() {
-//                @Override
-//                public void run() {
-//                    Toast.makeText(context, "Toast from broadcast receiver", Toast.LENGTH_SHORT).show();
-//                }
-//            });
-//        }
-
-
-
-
 }
 
 
