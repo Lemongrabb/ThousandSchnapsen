@@ -38,7 +38,7 @@ public abstract class GameActivity extends AppCompatActivity {
     String playerNickName = "";
     String serverName = "";
     int clientNumberOfPLayers = 0;
-    public static int MAX_NUMBER_OF_CLIENTS = 1; //Maksymalna liczba klient-ów
+    public static int MAX_NUMBER_OF_CLIENTS = 2; //Maksymalna liczba klient-ów
     public static int MAX_NUMBER_OF_PLAYERS = MAX_NUMBER_OF_CLIENTS +1;
     boolean connected = false;
     public String message = "";
