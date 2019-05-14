@@ -12,7 +12,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,14 +31,14 @@ import org.greenrobot.eventbus.Subscribe;
 
 public abstract class GameActivity extends AppCompatActivity {
 
-    private boolean gameReady;
+    public boolean gameReady;
     boolean scanDevices = false;
     String deviceName = "";
     String deviceAddress = "";
     String playerNickName = "";
     String serverName = "";
     int clientNumberOfPLayers = 0;
-    public static int MAX_NUMBER_OF_CLIENTS = 1; //Maksymalna liczba klient-ów
+    public static int MAX_NUMBER_OF_CLIENTS = 2; //Maksymalna liczba klient-ów
     public static int MAX_NUMBER_OF_PLAYERS = MAX_NUMBER_OF_CLIENTS +1;
     boolean connected = false;
     public String message = "";
@@ -49,8 +48,7 @@ public abstract class GameActivity extends AppCompatActivity {
 
     private static final String TAG = "GameActivity";
 
-    Button sendMessage;
-    EditText messageText;
+
     private static TextView tv_number_of_players_online;
     static AlertDialog dialogAwating;
 
@@ -79,6 +77,12 @@ public abstract class GameActivity extends AppCompatActivity {
 ///EVENT_BUS
     ////////////////////////////////////////////////////////////
 
+    public abstract void bluetoothMessage(String message);
+    public abstract void clientConnectionSuccessEvent();
+    public abstract void clientConnectionFailEvent(String serverAddress);
+    public abstract void serverConnectionSuccessEvent(String clientAddress);
+    public abstract void serverConnectionFailEvent(String clientAddress);
+
     //Służy do odczytywania wiadomości z bt
     @Subscribe
     public void onEvent (MessageSyncEvent syncMessage){
@@ -86,7 +90,7 @@ public abstract class GameActivity extends AppCompatActivity {
         message = syncMessage.getSyncMessage();
 
         if (gameReady){
-            toastMsg(message);
+            bluetoothMessage(message);
             connected = true;
             if(!(serverName == null)) {
                 //Jeśli jestem serwerem to odbieram dane i wysyłam do innych co jeszcze nie dostali
@@ -146,20 +150,20 @@ public abstract class GameActivity extends AppCompatActivity {
             gameReady = true;
             scanDevices = false;    //Przerwij skanowanie urządzeń bt dla serwera
             bluetoothManager.cancelDiscoveryTimer();
-            bluetoothManager.sendStringMessageForAll("$READY$");  //Wyślij znak specjalny do innych urządzeń, że wszystkie urządzenia są gotowe
+            sendStringMessageForAll("$READY$");  //Wyślij znak specjalny do innych urządzeń, że wszystkie urządzenia są gotowe
             hideDialog();
             toastMsg("Rozpoczynamy grę");
 
             //bluetoothManager.listOfConnectedPlayers tablia z adresami MAC i nick-ami graczy
-            for (String i : bluetoothManager.listOfConnectedPlayers.keySet()) {
-                System.out.println("key: " + i + " value: " + bluetoothManager.listOfConnectedPlayers.get(i));
-            }
+//            for (String i : bluetoothManager.listOfConnectedPlayers.keySet()) {
+//                System.out.println("key: " + i + " value: " + bluetoothManager.listOfConnectedPlayers.get(i));
+//            }
         }
         else {
             int numberOfPlayers = getmNbrClientConnection() + 1;
             changeText(numberOfPlayers);
             toastMsg("Liczba graczy: " + numberOfPlayers + " / " + MAX_NUMBER_OF_PLAYERS);
-            bluetoothManager.sendStringMessageForAll("$NUM_PLAYERS$"+numberOfPlayers);
+            sendStringMessageForAll("$NUM_PLAYERS$"+numberOfPlayers);
         }
     }
 
@@ -178,7 +182,7 @@ public abstract class GameActivity extends AppCompatActivity {
             Log.d("ServerConnection: ","Device: " + clientAddress.getClientAddress() + " disconnected");
             changeText(numberOfPlayers);
             toastMsg("Liczba graczy: "+numberOfPlayers+"/" +MAX_NUMBER_OF_PLAYERS);
-            bluetoothManager.sendStringMessageForAll("$NUM_PLAYERS$"+numberOfPlayers);
+            sendStringMessageForAll("$NUM_PLAYERS$"+numberOfPlayers);
             bluetoothManager.startDiscoveryforServer();
             scanDevices = true;
         }
@@ -190,22 +194,9 @@ public abstract class GameActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_internet);
-        sendMessage = findViewById(R.id.button);
-        messageText = findViewById(R.id.editText);
         bluetoothManager = new BluetoothManager(GameActivity.this);
         bluetoothManager.setUUIDappIdentifier(UUID);
 
-        //Przycisk do wysyłania wiadomości
-        sendMessage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (gameReady) {
-                    bluetoothManager.sendStringMessageForAll(messageText.getText().toString());
-                    Log.d("Send message:", messageText.getText().toString());
-                    messageText.getText().clear();
-                }
-            }
-        });
         //Pobieranie danych z intent PlayBluetoothActivity
         deviceName = getIntent().getStringExtra("DEVICE_NAME");
         deviceAddress = getIntent().getStringExtra("DEVICE_ADDRESS");
@@ -243,7 +234,6 @@ public abstract class GameActivity extends AppCompatActivity {
         if (scanDevices) {
             scanBluetoothDeviceReciever();
         }
-
     }
 
     @Override
@@ -375,5 +365,17 @@ public abstract class GameActivity extends AppCompatActivity {
     public int getmNbrClientConnection(){
         return bluetoothManager.getmNbrClientConnection();
     }
+
+    public void sendStringMessageForAll(String message){
+        bluetoothManager.sendStringMessageForAll(message);
+    }
+
+    public void sendStringMessage(String addressMac, String message){
+        bluetoothManager.sendStringMessage(addressMac, message);
+    }
+
+
+
+
 
 }
