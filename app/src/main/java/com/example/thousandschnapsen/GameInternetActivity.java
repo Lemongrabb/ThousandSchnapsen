@@ -3,6 +3,7 @@ package com.example.thousandschnapsen;
 import android.app.AlertDialog;
 import android.content.Intent;
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,9 +35,11 @@ public class GameInternetActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_internet);
 
+        //SOCKETIO GET CURRENT INSTANCE
         SocketIO app = (SocketIO) getApplication();
         mSocket = app.getSocket();
 
+        //DATA ABOUT SERVER AND PLAYER ON CURRENT DEVICE
         isServer = getIntent().getStringExtra("IS_SERVER"); //IF VALUE "1" - DEVICE IS A SERVER, IF VALUE "0" - DEVICE IS A CLIENT
         serverName = getIntent().getStringExtra("SERVER_NAME");
         playerId = getIntent().getStringExtra("PLAYER_ID");
@@ -57,6 +60,7 @@ public class GameInternetActivity extends AppCompatActivity {
             }
         });
 
+        //AWAITING FOR PLAYERS DIALOG
         final AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Oczekiwanie na graczy...")
                 .setView(view)
@@ -64,7 +68,10 @@ public class GameInternetActivity extends AppCompatActivity {
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
 
+        //JOIN SERVER FUNCTION
         mSocket.emit("joinServer", serverName, playerId, playerNickName);
+
+        //FUNCTION THAT LISTENS TO OTHER PLAYERS JOINING THE SERVER
         mSocket.on("joinServer", new Emitter.Listener() {
             @Override
             public void call(final Object... args) {
@@ -119,6 +126,7 @@ public class GameInternetActivity extends AppCompatActivity {
             }
         });
 
+        //FUNCTION THAT LISTENS IF SERVER IS DISABLED
         mSocket.on("serverDisabled", new Emitter.Listener() {
             @Override
             public void call(final Object... args) {
@@ -138,7 +146,8 @@ public class GameInternetActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 String data = editText.getText().toString();
-                mSocket.emit("internetGameData", serverName, data); //SENDING DATA TO THE OTHERS CLIENTS IN THE CURRENT GAME GAME
+                //SENDING DATA TO THE OTHERS CLIENTS IN THE CURRENT GAME
+                mSocket.emit("internetGameData", serverName, data);
             }
         });
 
