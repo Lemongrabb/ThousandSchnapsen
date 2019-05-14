@@ -38,7 +38,7 @@ public abstract class GameActivity extends AppCompatActivity {
     String playerNickName = "";
     String serverName = "";
     int clientNumberOfPLayers = 0;
-    public static int MAX_NUMBER_OF_CLIENTS = 2; //Maksymalna liczba klient-ów
+    public static int MAX_NUMBER_OF_CLIENTS = 1; //Maksymalna liczba klient-ów
     public static int MAX_NUMBER_OF_PLAYERS = MAX_NUMBER_OF_CLIENTS +1;
     boolean connected = false;
     public String message = "";
@@ -90,7 +90,12 @@ public abstract class GameActivity extends AppCompatActivity {
         message = syncMessage.getSyncMessage();
 
         if (gameReady){
-            bluetoothMessage(message);
+            if (message.equals("$!READY$") && serverName == null && gameReady) {
+                changeText(2);
+                toastMsg("Liczba graczy: 2/" +MAX_NUMBER_OF_PLAYERS);
+                gameReady = false;
+            }
+            else bluetoothMessage(message);
             connected = true;
             if(!(serverName == null)) {
                 //Jeśli jestem serwerem to odbieram dane i wysyłam do innych co jeszcze nie dostali
@@ -106,13 +111,9 @@ public abstract class GameActivity extends AppCompatActivity {
             toastMsg("Rozpoczynamy grę");
             gameReady = true;
         }
-        if (message.equals("$!READY$") && serverName == null && gameReady) {
-            changeText(2);
-            toastMsg("Liczba graczy: 2/" +MAX_NUMBER_OF_PLAYERS);
-            gameReady = false;
-        }
-        if (message.startsWith("$NUM_PLAYERS$")){
-            String[] numPlayers = message.split("$NUM_PLAYERS$");
+
+        if (message.startsWith("$NUM_PLAYERS$") && serverName == null){
+            String[] numPlayers = message.split("\\$NUM_PLAYERS\\$");
             changeText(Integer.parseInt(numPlayers[1]));
             toastMsg("Liczba graczy: "+numPlayers[1]+"/" +MAX_NUMBER_OF_PLAYERS);
 
@@ -123,6 +124,7 @@ public abstract class GameActivity extends AppCompatActivity {
     //Jeśli udało się połączyć się z serwerm
     @Subscribe
     public void onEvent (ClientConnectionSuccessEvent event){
+        clientConnectionSuccessEvent();
         bluetoothManager.onClientConnectionSuccess();
         Log.d("ClientConnection", "Success");
     }
@@ -130,6 +132,7 @@ public abstract class GameActivity extends AppCompatActivity {
     //Jeśli utracono lub nie udało się połączyć z serwerem
     @Subscribe
     public void onEvent (ClientConnectionFailEvent serverAddress){
+        clientConnectionFailEvent(serverAddress.getServerAddress());
         Log.e("ClientConnectionFail", "Can't connect with server: " + serverAddress.getServerAddress());
         toastMsg("Nie można się połączyć z serwerem lub serwer nie istnieje");
         Intent intent = new Intent(GameActivity.this, MainActivity.class);
@@ -140,6 +143,7 @@ public abstract class GameActivity extends AppCompatActivity {
     //Jesli doszło pomyślnego połączenia się z klientem
     @Subscribe
     public void onEvent (ServerConnectionSuccessEvent clientAddress){
+        serverConnectionSuccessEvent(clientAddress.getClientAddress());
         bluetoothManager.onServerConnectionSuccess(clientAddress.getClientAddress());
         Log.d("ServerConnection", "Success");
         Log.d("NumberOfPlayers: ", ""+getmNbrClientConnection());
@@ -154,10 +158,10 @@ public abstract class GameActivity extends AppCompatActivity {
             hideDialog();
             toastMsg("Rozpoczynamy grę");
 
-            //bluetoothManager.listOfConnectedPlayers tablia z adresami MAC i nick-ami graczy
-//            for (String i : bluetoothManager.listOfConnectedPlayers.keySet()) {
-//                System.out.println("key: " + i + " value: " + bluetoothManager.listOfConnectedPlayers.get(i));
-//            }
+            //tablia z adresami MAC i nick-ami graczy
+            for (String i : bluetoothManager.listOfConnectedPlayers.keySet()) {
+                System.out.println("key: " + i + " value: " + bluetoothManager.listOfConnectedPlayers.get(i));
+            }
         }
         else {
             int numberOfPlayers = getmNbrClientConnection() + 1;
@@ -170,6 +174,7 @@ public abstract class GameActivity extends AppCompatActivity {
     //Jeśli doszło do przerwania z klientem to tutaj wyrzuca jego adres MAC
     @Subscribe
     public void onEvent (ServerConnectionFailEvent clientAddress){
+        serverConnectionFailEvent(clientAddress.getClientAddress());
         bluetoothManager.onServerConnectionFailed(clientAddress.getClientAddress());
         int numberOfPlayers = getmNbrClientConnection() +1;
         Log.d("ServerConnection: ","Device: " + clientAddress.getClientAddress() + " disconnected");
@@ -182,6 +187,7 @@ public abstract class GameActivity extends AppCompatActivity {
             Log.d("ServerConnection: ","Device: " + clientAddress.getClientAddress() + " disconnected");
             changeText(numberOfPlayers);
             toastMsg("Liczba graczy: "+numberOfPlayers+"/" +MAX_NUMBER_OF_PLAYERS);
+            sendStringMessageForAll("$!READY$");
             sendStringMessageForAll("$NUM_PLAYERS$"+numberOfPlayers);
             bluetoothManager.startDiscoveryforServer();
             scanDevices = true;

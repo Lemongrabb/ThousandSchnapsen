@@ -61,15 +61,15 @@ public class PlayBluetoothActivity extends AppCompatActivity {
             if (BluetoothDevice.ACTION_FOUND.equals(action) || BluetoothDevice.ACTION_NAME_CHANGED.equals(action)) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 int rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);
+                Log.d(TAG, "onReceive: " + device.getName() + ": " + device.getAddress()+ "  RSSI: "+ rssi);
                 if ((device.getName() == null)){
                     Log.d(TAG, "Device with null name, ignoring...");
                 }
-                if (rssi == -32768){
+                else if (rssi == -32768){
                     Log.d(TAG, "Ghost server, ignoring...");
                 }
                 else if (device.getName().startsWith("TSS") && !mBTDevices.contains(device)) {
                     mBTDevices.add(device);
-                    Log.d(TAG, "onReceive: " + device.getName() + ": " + device.getAddress()+ "  RSSI: "+ rssi);
                 }
 
                 if (!((mBTDevices) == mBTDevicesOld)) {
