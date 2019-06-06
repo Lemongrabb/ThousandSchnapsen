@@ -14,7 +14,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
-        android:name=".SocketIO"
+        android:name=".SocketIO.SocketIO"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -22,13 +22,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".PlayBluetoothActivity" />
-        <activity android:name=".GameBluetoothActivity" />
-        <activity android:name=".GameInternetActivity" android:noHistory="true" android:configChanges="orientation|keyboardHidden|screenSize" />
-        <activity android:name=".PlayInternetActivity" android:noHistory="true" android:configChanges="orientation|keyboardHidden|screenSize" />
-        <activity android:name=".PlayWifiActivity" android:noHistory="true" android:configChanges="orientation|keyboardHidden|screenSize" />
-        <activity android:name=".ServerWifiActivity" android:noHistory="true" android:configChanges="orientation|keyboardHidden|screenSize" />
-        <activity android:name=".GameWifiActivity" android:noHistory="true" android:configChanges="orientation|keyboardHidden|screenSize" />
+        <activity android:name=".bluetooth.PlayBluetoothActivity" />
+        <activity android:name=".bluetooth.GameBluetoothActivity" />
+        <activity android:name=".internet.GameInternetActivity" android:noHistory="true" android:configChanges="orientation|keyboardHidden|screenSize" />
+        <activity android:name=".internet.PlayInternetActivity" android:noHistory="true" android:configChanges="orientation|keyboardHidden|screenSize" />
+        <activity android:name=".wifi.PlayWifiActivity" android:noHistory="true" android:configChanges="orientation|keyboardHidden|screenSize" />
+        <activity android:name=".wifi.ServerWifiActivity" android:noHistory="true" android:configChanges="orientation|keyboardHidden|screenSize" />
+        <activity android:name=".wifi.GameWifiActivity" android:noHistory="true" android:configChanges="orientation|keyboardHidden|screenSize" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

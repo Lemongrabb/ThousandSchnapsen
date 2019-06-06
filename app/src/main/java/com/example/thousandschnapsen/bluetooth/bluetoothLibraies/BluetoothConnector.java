@@ -1,4 +1,4 @@
-package com.example.thousandschnapsen.bluetooth;
+package com.example.thousandschnapsen.bluetooth.bluetoothLibraies;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;

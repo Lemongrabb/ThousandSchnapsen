@@ -1,4 +1,4 @@
-package com.example.thousandschnapsen;
+package com.example.thousandschnapsen.wifi;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,6 +16,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.thousandschnapsen.MainActivity;
+import com.example.thousandschnapsen.R;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

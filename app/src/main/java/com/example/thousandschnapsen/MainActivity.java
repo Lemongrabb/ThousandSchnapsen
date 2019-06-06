@@ -6,6 +6,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.example.thousandschnapsen.bluetooth.PlayBluetoothActivity;
+import com.example.thousandschnapsen.internet.PlayInternetActivity;
+import com.example.thousandschnapsen.wifi.PlayWifiActivity;
+
 public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
