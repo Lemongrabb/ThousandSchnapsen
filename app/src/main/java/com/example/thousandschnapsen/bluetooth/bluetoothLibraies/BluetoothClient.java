@@ -1,11 +1,11 @@
-package com.example.thousandschnapsen.bluetooth;
+package com.example.thousandschnapsen.bluetooth.bluetoothLibraies;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
-import com.example.thousandschnapsen.bluetooth.eventBus.ClientConnectionFailEvent;
-import com.example.thousandschnapsen.bluetooth.eventBus.ClientConnectionSuccessEvent;
+import com.example.thousandschnapsen.bluetooth.bluetoothLibraies.eventBus.ClientConnectionFailEvent;
+import com.example.thousandschnapsen.bluetooth.bluetoothLibraies.eventBus.ClientConnectionSuccessEvent;
 
 import org.greenrobot.eventbus.EventBus;
 

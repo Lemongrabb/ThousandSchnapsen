@@ -1,4 +1,4 @@
-package com.example.thousandschnapsen;
+package com.example.thousandschnapsen.wifi;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -21,6 +21,10 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.thousandschnapsen.MainActivity;
+import com.example.thousandschnapsen.R;
+
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
@@ -305,8 +309,8 @@ class MyCustomAdapterWifi extends BaseAdapter implements ListAdapter {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.putExtra("SERVER_IP", server_ip);
                 intent.putExtra("SERVER_NAME", server_name);
-                intent.putExtra("PLAYER_ID",  com.example.thousandschnapsen.PlayWifiActivity.playerId);
-                intent.putExtra("PLAYER_NICK_NAME",  com.example.thousandschnapsen.PlayWifiActivity.playerNickname);
+                intent.putExtra("PLAYER_ID",  com.example.thousandschnapsen.wifi.PlayWifiActivity.playerId);
+                intent.putExtra("PLAYER_NICK_NAME",  com.example.thousandschnapsen.wifi.PlayWifiActivity.playerNickname);
                 context.startActivity(intent);
             }
         });

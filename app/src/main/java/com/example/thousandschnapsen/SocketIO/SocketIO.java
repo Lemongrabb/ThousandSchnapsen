@@ -1,4 +1,4 @@
-package com.example.thousandschnapsen;
+package com.example.thousandschnapsen.SocketIO;
 
 import android.app.Application;
 import com.github.nkzawa.socketio.client.IO;

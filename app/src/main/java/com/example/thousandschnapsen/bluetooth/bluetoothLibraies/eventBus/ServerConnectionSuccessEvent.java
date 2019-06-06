@@ -1,4 +1,4 @@
-package com.example.thousandschnapsen.bluetooth.eventBus;
+package com.example.thousandschnapsen.bluetooth.bluetoothLibraies.eventBus;
 
 public class ServerConnectionSuccessEvent {
     private final String clientAddress;

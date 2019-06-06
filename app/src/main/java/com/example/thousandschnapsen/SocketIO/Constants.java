@@ -1,4 +1,4 @@
-package com.example.thousandschnapsen;
+package com.example.thousandschnapsen.SocketIO;
 
 public class Constants {
     public static final String SERVER_URL = "http://51.77.158.206";
