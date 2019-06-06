@@ -1,4 +1,4 @@
-package com.example.thousandschnapsen.internet;
+package com.example.thousandschnapsen;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -20,9 +20,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.thousandschnapsen.MainActivity;
-import com.example.thousandschnapsen.R;
-import com.example.thousandschnapsen.SocketIO.SocketIO;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Socket;
 
@@ -301,8 +298,8 @@ class MyCustomAdapter extends BaseAdapter implements ListAdapter {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.putExtra("IS_SERVER", "0");
                 intent.putExtra("SERVER_NAME", server_name);
-                intent.putExtra("PLAYER_ID", PlayInternetActivity.playerId);
-                intent.putExtra("PLAYER_NICK_NAME", PlayInternetActivity.playerNickName);
+                intent.putExtra("PLAYER_ID", com.example.thousandschnapsen.PlayInternetActivity.playerId);
+                intent.putExtra("PLAYER_NICK_NAME", com.example.thousandschnapsen.PlayInternetActivity.playerNickName);
                 intent.putExtra("PLAYER_ONLINE", players_online);
                 intent.putExtra("MAX_PLAYER", number_of_players);
                 context.startActivity(intent);

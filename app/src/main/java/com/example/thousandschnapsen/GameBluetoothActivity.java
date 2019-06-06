@@ -1,13 +1,17 @@
-package com.example.thousandschnapsen.bluetooth;
+package com.example.thousandschnapsen;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.example.thousandschnapsen.R;
-import com.example.thousandschnapsen.bluetooth.bluetoothLibraies.GameActivity;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.thousandschnapsen.bluetooth.GameActivity;
+
+import java.util.HashMap;
 
 
 public class GameBluetoothActivity extends GameActivity {

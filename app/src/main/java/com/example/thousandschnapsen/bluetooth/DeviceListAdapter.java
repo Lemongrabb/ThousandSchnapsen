@@ -1,10 +1,11 @@
-package com.example.thousandschnapsen.bluetooth.bluetoothLibraies;
+package com.example.thousandschnapsen.bluetooth;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,7 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.example.thousandschnapsen.bluetooth.GameBluetoothActivity;
+import com.example.thousandschnapsen.GameBluetoothActivity;
 import com.example.thousandschnapsen.R;
 
 import java.util.ArrayList;

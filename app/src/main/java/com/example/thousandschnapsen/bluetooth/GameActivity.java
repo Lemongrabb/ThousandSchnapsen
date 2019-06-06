@@ -1,4 +1,4 @@
-package com.example.thousandschnapsen.bluetooth.bluetoothLibraies;
+package com.example.thousandschnapsen.bluetooth;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -20,11 +20,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.thousandschnapsen.MainActivity;
 import com.example.thousandschnapsen.R;
-import com.example.thousandschnapsen.bluetooth.bluetoothLibraies.eventBus.ServerConnectionFailEvent;
-import com.example.thousandschnapsen.bluetooth.bluetoothLibraies.eventBus.ServerConnectionSuccessEvent;
-import com.example.thousandschnapsen.bluetooth.bluetoothLibraies.eventBus.ClientConnectionFailEvent;
-import com.example.thousandschnapsen.bluetooth.bluetoothLibraies.eventBus.ClientConnectionSuccessEvent;
-import com.example.thousandschnapsen.bluetooth.bluetoothLibraies.eventBus.MessageSyncEvent;
+import com.example.thousandschnapsen.bluetooth.eventBus.ClientConnectionFailEvent;
+import com.example.thousandschnapsen.bluetooth.eventBus.ClientConnectionSuccessEvent;
+import com.example.thousandschnapsen.bluetooth.eventBus.MessageSyncEvent;
+import com.example.thousandschnapsen.bluetooth.eventBus.ServerConnectionFailEvent;
+import com.example.thousandschnapsen.bluetooth.eventBus.ServerConnectionSuccessEvent;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;

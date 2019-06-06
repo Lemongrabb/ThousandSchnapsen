@@ -1,10 +1,10 @@
-package com.example.thousandschnapsen.bluetooth.bluetoothLibraies;
+package com.example.thousandschnapsen.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.util.Log;
 
-import com.example.thousandschnapsen.bluetooth.bluetoothLibraies.eventBus.HowManyPlayersEvent;
+import com.example.thousandschnapsen.bluetooth.eventBus.HowManyPlayersEvent;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import androidx.appcompat.app.AppCompatActivity;

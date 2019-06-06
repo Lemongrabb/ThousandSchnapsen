@@ -1,4 +1,4 @@
-package com.example.thousandschnapsen.bluetooth;
+package com.example.thousandschnapsen;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
@@ -21,9 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.example.thousandschnapsen.MainActivity;
-import com.example.thousandschnapsen.R;
-import com.example.thousandschnapsen.bluetooth.bluetoothLibraies.DeviceListAdapter;
+import com.example.thousandschnapsen.bluetooth.DeviceListAdapter;
 
 import java.util.ArrayList;
 import java.util.Timer;

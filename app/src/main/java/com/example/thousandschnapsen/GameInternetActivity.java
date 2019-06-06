@@ -1,4 +1,4 @@
-package com.example.thousandschnapsen.internet;
+package com.example.thousandschnapsen;
 
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -12,9 +12,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.thousandschnapsen.MainActivity;
-import com.example.thousandschnapsen.R;
-import com.example.thousandschnapsen.SocketIO.SocketIO;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Socket;
 
