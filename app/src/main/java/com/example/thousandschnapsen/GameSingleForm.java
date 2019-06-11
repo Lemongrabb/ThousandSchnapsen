@@ -71,10 +71,6 @@ public class GameSingleForm {
 
 
 
-
-
-
-
     void initDeal(){
         if(isMaster){
             List<Integer> cardNumbers = shuffleCards();
@@ -107,8 +103,6 @@ public class GameSingleForm {
                 return o1.getColor().compareTo(o2.getColor());
             }
         });
-
-
     }
 
     void convertNumbersToCards(List<Integer> cardNumbers){
