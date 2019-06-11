@@ -20,7 +20,14 @@ public class BluetoothMessageBroadcaster extends GameActivity implements Message
 
     @Override
     public void bluetoothMessage(String message) {
+        String[] recievedMessageInfo = message.split("||"); //RECEIVED DATA FROM THE OTHERS CLIENT IN CURRENT GAME
 
+        GAME_MESSAGE_TYPE messageType = GAME_MESSAGE_TYPE.valueOf(recievedMessageInfo[0]);
+        String toJson = recievedMessageInfo[1];
+        Boolean processed = Boolean.parseBoolean(recievedMessageInfo[2]);
+
+        MessageInfo messageInfo = new MessageInfo(messageType, toJson, processed);
+        messages.add(messageInfo);
     }
 
     @Override
